@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.nikitavbv'
+version '0.1'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+application {
+    mainClassName = "io.vertx.core.Launcher"
+}
+
+ext {
+    mainVerticleName = "Application"
+    watchForChange = "src/**/*.java"
+    doOnChange = "${projectDir}/gradlew classes"
+}
+
+dependencies {
+    compile 'io.vertx:vertx-core:3.7.0'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+tasks {
+    run {
+        args = ["run", mainVerticleName, "--redeploy=${watchForChange}", "--launcher-class=${application.mainClassName}", "--on-redeploy=${doOnChange}"]
+    }
+}
