@@ -1,0 +1,12 @@
+version: '3'
+services:
+  db:
+    image: postgres:11.3-alpine
+    environment:
+      - POSTGRES_PASSWORD=devpassword
+      - POSTGRES_USER=devuser
+      - POSTGRES_DB=photos
+    volumes:
+      - "./data/db:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
