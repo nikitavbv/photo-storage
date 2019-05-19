@@ -17,14 +17,20 @@ application {
 }
 
 ext {
-    mainVerticleName = "Application"
+    mainVerticleName = "com.nikitavbv.photostorage.MainVerticle"
     watchForChange = "src/**/*.java"
     doOnChange = "${projectDir}/gradlew classes"
 }
 
 dependencies {
     compile 'io.vertx:vertx-core:3.7.0'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile 'io.vertx:vertx-config:3.7.0'
+    compile 'io.vertx:vertx-web:3.7.0'
+    compile 'com.kosprov.jargon2:jargon2-api:1.1.1'
+    runtime 'com.kosprov.jargon2:jargon2-native-ri-backend:1.1.1'
+    compile 'io.reactiverse:reactive-pg-client:0.11.2'
+    testCompile 'junit:junit:4.12'
+    testCompile 'io.vertx:vertx-unit:3.7.0'
 }
 
 tasks {
