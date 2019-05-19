@@ -38,20 +38,34 @@ public class WebServerVerticle extends AbstractVerticle {
     final Router router = Router.router(vertx);
     router.post("/api/v1/users").handler(BodyHandler.create()).handler(apiHandler(EventBusAddress.API_ADD_USER));
     router.post("/api/v1/auth").handler(BodyHandler.create()).handler(apiHandler(EventBusAddress.API_AUTH));
+    router.get("/api/v1/users/me").handler(apiHandler(EventBusAddress.API_GET_ME));
     return router;
   }
 
   private Handler<RoutingContext> apiHandler(String address) {
     return req -> {
-      vertx.eventBus().send(address, req.getBodyAsJson(), resp -> {
-        if (resp.succeeded()) {
-          req.response().end(resp.result().body().toString());
-        } else {
-          logError("Failed to get message reply", resp.cause());
-          JsonObject respObject = new JsonObject().put("status", "error").put("error", "no_reply");
-          req.response().setStatusCode(500).end(respObject.toString());
+      try {
+        JsonObject body = req.getBodyAsJson();
+        if (body == null) {
+          body = new JsonObject();
         }
-      });
+        body.put("ip", req.request().connection().remoteAddress().host());
+        body.put("user_agent", req.request().getHeader("User-Agent"));
+        if (req.request().headers().contains("Authorization")) {
+          body.put("access_token", req.request().getHeader("Authorization").replace("Bearer ", ""));
+        }
+        vertx.eventBus().send(address, body, resp -> {
+          if (resp.succeeded()) {
+            req.response().end(resp.result().body().toString());
+          } else {
+            logError("Failed to get message reply", resp.cause());
+            JsonObject respObject = new JsonObject().put("status", "error").put("error", "no_reply");
+            req.response().setStatusCode(500).end(respObject.toString());
+          }
+        });
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     };
   }
 
