@@ -13,14 +13,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(VertxUnitRunner.class)
-public class PhotoDownloadTest {
+public class PhotoApiTest {
 
   private Vertx vertx;
 
   @Before
   public void deployVerticle(TestContext context) {
     vertx = Vertx.vertx();
-    vertx.deployVerticle(PhotoDownloadVerticle.class.getName(), context.asyncAssertSuccess());
+    vertx.deployVerticle(PhotoApiVericle.class.getName(), context.asyncAssertSuccess());
   }
 
   @After
@@ -29,13 +29,8 @@ public class PhotoDownloadTest {
   }
 
   @Test
-  public void testDownload(TestContext context) {
-    final Async downloadAsync = context.async();
-
-    String photoID = "67dab16a-8cbf-4110-9af4-d45c37d48031";
-    JsonObject photoDownloadRequest = new JsonObject();
-    photoDownloadRequest.put("access_token", "dummy_access_token");
-    photoDownloadRequest.put("photo_id", photoID);
+  public void getAllPhotos(TestContext context) {
+    final Async async = context.async();
 
     vertx.eventBus().consumer(EventBusAddress.DATABASE_GET, getReq -> {
       JsonObject getReqJson = ((JsonObject) getReq.body());
@@ -53,19 +48,23 @@ public class PhotoDownloadTest {
           sessionObj.put("valid_until", System.currentTimeMillis() + 1000 * 60 * 10);
           getReq.reply(new JsonObject().put("rows", new JsonArray().add(sessionObj)));
           break;
-        case "keys":
-          JsonObject keysObj = new JsonObject();
-          keysObj.put("user_id", 42);
-          keysObj.put("photo_id", photoID);
-          keysObj.put("key_enc", "aa");
-          getReq.reply(new JsonObject().put("rows", new JsonArray().add(keysObj)));
-          break;
         case "photos":
           JsonObject photoObj = new JsonObject();
           photoObj.put("storage_driver", "filesystem");
-          photoObj.put("storage_key", photoID);
+          photoObj.put("storage_key", "photo1");
           photoObj.put("photo_data_iv", "bb");
-          getReq.reply(new JsonObject().put("rows", new JsonArray().add(photoObj)));
+          JsonObject photoObj2 = new JsonObject();
+          photoObj.put("storage_driver", "filesystem");
+          photoObj.put("storage_key", "photo2");
+          photoObj.put("photo_data_iv", "aa");
+          getReq.reply(new JsonObject().put("rows", new JsonArray().add(photoObj).add(photoObj2)));
+          break;
+        case "keys":
+          JsonObject keyObj = new JsonObject();
+          keyObj.put("photo_id", "photo1");
+          JsonObject keyObj2 = new JsonObject();
+          keyObj2.put("photo_id", "photo2");
+          getReq.reply(new JsonObject().put("rows", new JsonArray().add(keyObj).add(keyObj2)));
           break;
         default:
           System.err.println("Unmocked database req: " + getReqJson);
@@ -73,19 +72,16 @@ public class PhotoDownloadTest {
       }
     });
 
-    vertx.eventBus().consumer("photo.driver.filesystem.download", getReq -> {
-      JsonObject getReqJson = ((JsonObject) getReq.body());
-      context.assertTrue(getReqJson.containsKey("key"));
-      getReq.reply(new JsonObject().put("photo_data_enc", "00"));
-    });
-
-    vertx.eventBus().send(EventBusAddress.API_PHOTO_DOWNLOAD, photoDownloadRequest, photoDownloadResponse -> {
-      JsonObject photoDownloadResult = ((JsonObject) photoDownloadResponse.result().body());
-      context.assertEquals("ok", photoDownloadResult.getString("status"));
-      context.assertTrue(photoDownloadResult.containsKey("photo_data_enc"));
-      context.assertTrue(photoDownloadResult.containsKey("photo_data_iv"));
-      context.assertTrue(photoDownloadResult.containsKey("key_enc"));
-      downloadAsync.complete();
+    JsonObject getMyPhotosReq = new JsonObject();
+    getMyPhotosReq.put("access_token", "dummy_access_token");
+    vertx.eventBus().send(EventBusAddress.API_GET_MY_PHOTOS, getMyPhotosReq, getMyPhotosResp -> {
+      JsonObject myPhotosResult = ((JsonObject) getMyPhotosResp.result().body());
+      context.assertEquals("ok", myPhotosResult.getString("status"));
+      context.assertEquals("photo1", myPhotosResult.getJsonArray("photos").getJsonObject(0)
+              .getString("id"));
+      context.assertEquals("photo2", myPhotosResult.getJsonArray("photos").getJsonObject(1)
+              .getString("id"));
+      async.complete();
     });
   }
 
