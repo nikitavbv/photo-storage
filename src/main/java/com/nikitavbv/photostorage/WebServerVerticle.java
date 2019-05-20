@@ -39,6 +39,8 @@ public class WebServerVerticle extends AbstractVerticle {
     router.post("/api/v1/users").handler(BodyHandler.create()).handler(apiHandler(EventBusAddress.API_ADD_USER));
     router.post("/api/v1/auth").handler(BodyHandler.create()).handler(apiHandler(EventBusAddress.API_AUTH));
     router.get("/api/v1/users/me").handler(apiHandler(EventBusAddress.API_GET_ME));
+    router.post("/api/v1/photos").handler(BodyHandler.create())
+            .handler(apiHandler(EventBusAddress.API_PHOTO_UPLOAD));
     return router;
   }
 
