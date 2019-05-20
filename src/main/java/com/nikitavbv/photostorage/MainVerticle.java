@@ -1,5 +1,6 @@
 package com.nikitavbv.photostorage;
 
+import com.nikitavbv.photostorage.api.PhotoApiVericle;
 import com.nikitavbv.photostorage.auth.AuthVerticle;
 import com.nikitavbv.photostorage.database.PostgreSQLVerticle;
 import com.nikitavbv.photostorage.storage.FilesystemStorageVerticle;
@@ -18,7 +19,8 @@ public class MainVerticle extends AbstractVerticle {
             PostgreSQLVerticle.class.getName(),
             PhotoUploadVerticle.class.getName(),
             FilesystemStorageVerticle.class.getName(),
-            PhotoDownloadVerticle.class.getName()
+            PhotoDownloadVerticle.class.getName(),
+            PhotoApiVericle.class.getName()
     ).forEach(vertx::deployVerticle);
   }
 
