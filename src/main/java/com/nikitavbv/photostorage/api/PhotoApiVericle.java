@@ -18,6 +18,8 @@ public class PhotoApiVericle extends ApiVerticle {
   private Future<JsonObject> getUserPhotos(JsonObject req) {
     Future<JsonObject> future = Future.future();
 
+    System.out.println("here");
+
     getUserBySessionToken(req.getString("access_token")).setHandler(userReply -> {
       ApplicationUser user = userReply.result();
 

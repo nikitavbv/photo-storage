@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.StaticHandler;
 
 public class WebServerVerticle extends AbstractVerticle {
 
@@ -41,7 +42,10 @@ public class WebServerVerticle extends AbstractVerticle {
     router.get("/api/v1/users/me").handler(apiHandler(EventBusAddress.API_GET_ME));
     router.post("/api/v1/photos").handler(BodyHandler.create())
             .handler(apiHandler(EventBusAddress.API_PHOTO_UPLOAD));
+    router.get("/api/v1/users/me/photos").handler(apiHandler(EventBusAddress.API_GET_MY_PHOTOS));
     router.get("/api/v1/photos/:photo_id").handler(apiHandler(EventBusAddress.API_PHOTO_DOWNLOAD));
+    router.get("/").handler(StaticHandler.create("frontend/dist/frontend"));
+    router.get("/*").handler(StaticHandler.create("frontend/dist/frontend"));
     return router;
   }
 

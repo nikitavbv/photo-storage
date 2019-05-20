@@ -1,0 +1,16 @@
+<div class="header">
+  <div class="app-name">Photo storage</div>
+  <div class="status-text">{{ statusText }}<div>
+  <input placeholder="Search..." />
+</div>
+
+<form class="box" method="post" action="" enctype="multipart/form-data" (dragover)="this.onDragover($event)" (drop)="this.onDrag($event)">
+  <div class="photos">
+    <div class="photos" *ngFor="let photo of photos">
+      <img src="{{ photo }}" />
+    </div>
+  </div>
+
+</form>
+
+<router-outlet></router-outlet>
