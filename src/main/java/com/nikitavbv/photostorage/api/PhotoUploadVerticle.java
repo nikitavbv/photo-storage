@@ -1,4 +1,4 @@
-package com.nikitavbv.photostorage.upload;
+package com.nikitavbv.photostorage.api;
 
 import com.nikitavbv.photostorage.ApiVerticle;
 import com.nikitavbv.photostorage.EventBusAddress;
@@ -6,7 +6,6 @@ import com.nikitavbv.photostorage.models.ApplicationUser;
 import com.nikitavbv.photostorage.storage.FilesystemStorageVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Future;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.Arrays;
 import java.util.UUID;
@@ -41,7 +40,7 @@ public class PhotoUploadVerticle extends ApiVerticle {
       JsonObject driverReq = new JsonObject()
               .put("photo_data_enc", uploadPhotoRequest.getString("photo_data_enc"))
               .put("photo_id", photoID);
-      vertx.eventBus().send("photo.driver." + storageDriver + ".upload", driverReq, driverResp -> {
+      vertx.eventBus().send("photo.driver." + storageDriver + ".api", driverReq, driverResp -> {
           String storageKey = ((JsonObject) driverResp.result().body()).getString("key");
 
           JsonObject photoObject = new JsonObject()

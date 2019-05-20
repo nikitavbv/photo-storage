@@ -1,7 +1,6 @@
-package com.nikitavbv.photostorage.auth;
+package com.nikitavbv.photostorage.api;
 
 import com.nikitavbv.photostorage.EventBusAddress;
-import com.nikitavbv.photostorage.upload.PhotoUploadVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -102,7 +101,7 @@ public class PhotoUploadTest {
       }
     });
 
-    vertx.eventBus().consumer("photo.driver.filesystem.upload", getReq -> {
+    vertx.eventBus().consumer("photo.driver.filesystem.api", getReq -> {
       JsonObject getReqJson = ((JsonObject) getReq.body());
       context.assertTrue(getReqJson.containsKey("photo_data_enc"));
       context.assertTrue(getReqJson.containsKey("photo_id"));

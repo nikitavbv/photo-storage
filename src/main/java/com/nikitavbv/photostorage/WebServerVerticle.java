@@ -41,6 +41,7 @@ public class WebServerVerticle extends AbstractVerticle {
     router.get("/api/v1/users/me").handler(apiHandler(EventBusAddress.API_GET_ME));
     router.post("/api/v1/photos").handler(BodyHandler.create())
             .handler(apiHandler(EventBusAddress.API_PHOTO_UPLOAD));
+    router.get("/api/v1/photos/:photo_id").handler(apiHandler(EventBusAddress.API_PHOTO_DOWNLOAD));
     return router;
   }
 
@@ -56,6 +57,11 @@ public class WebServerVerticle extends AbstractVerticle {
         if (req.request().headers().contains("Authorization")) {
           body.put("access_token", req.request().getHeader("Authorization").replace("Bearer ", ""));
         }
+
+        for (String parameterKey : req.pathParams().keySet()) {
+          body.put(parameterKey, req.pathParam(parameterKey));
+        }
+
         vertx.eventBus().send(address, body, resp -> {
           if (resp.succeeded()) {
             req.response().end(resp.result().body().toString());
