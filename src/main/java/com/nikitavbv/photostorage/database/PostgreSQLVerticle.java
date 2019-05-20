@@ -150,6 +150,10 @@ public class PostgreSQLVerticle extends AbstractVerticle {
       }
     }
 
+    if (limit != -1) {
+      sql.append(" LIMIT ").append(limit);
+    }
+
     client.preparedQuery(sql.toString(), values, ar -> {
       if (!ar.succeeded()) {
         req.reply(new JsonObject().put("status", "error"));

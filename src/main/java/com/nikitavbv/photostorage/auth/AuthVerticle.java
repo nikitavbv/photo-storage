@@ -4,12 +4,11 @@ import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
 import static com.kosprov.jargon2.api.Jargon2.jargon2Verifier;
 
 import com.kosprov.jargon2.api.Jargon2;
+import com.nikitavbv.photostorage.ApiVerticle;
 import com.nikitavbv.photostorage.EventBusAddress;
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.security.MessageDigest;
@@ -18,11 +17,8 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-public class AuthVerticle extends AbstractVerticle {
+public class AuthVerticle extends ApiVerticle {
 
   private static final int SALT_LENGTH = 16;
   private static final int HASH_LENGTH = 16;
@@ -36,7 +32,7 @@ public class AuthVerticle extends AbstractVerticle {
   public void start() {
     final EventBus eventBus = vertx.eventBus();
     eventBus.consumer(EventBusAddress.API_ADD_USER, addJsonConsumer(this::createUser, Arrays.asList(
-            "username", "password", "public_key"
+            "username", "password", "public_key", "private_key_enc"
     )));
     eventBus.consumer(EventBusAddress.API_AUTH, addJsonConsumer(this::authUser, Arrays.asList(
             "username", "password", "ip", "user_agent"
@@ -44,30 +40,6 @@ public class AuthVerticle extends AbstractVerticle {
     eventBus.consumer(EventBusAddress.API_GET_ME, addJsonConsumer(this::getMe, Collections.singletonList(
             "access_token"
     )));
-  }
-
-  private Handler<Message<JsonObject>> addJsonConsumer(Function<JsonObject, Future<JsonObject>> consumer,
-                                                       List<String> requiredFields) {
-    return resp -> {
-      JsonObject body = resp.body();
-      if (body == null) {
-        resp.reply(new JsonObject().put("status", "error").put("error", "empty_body"));
-        return;
-      }
-
-      List<String> missingFields = requiredFields.stream().filter(k -> !body.containsKey(k))
-              .collect(Collectors.toList());
-      if (!missingFields.isEmpty()) {
-        JsonObject result = new JsonObject()
-                .put("status", "error")
-                .put("error", "missing_fields")
-                .put("missing_fields", missingFields);
-        resp.reply(result);
-        return;
-      }
-
-      consumer.apply(body).setHandler(res -> resp.reply(res.result()));
-    };
   }
 
   private Future<JsonObject> createUser(JsonObject req) {
@@ -79,6 +51,7 @@ public class AuthVerticle extends AbstractVerticle {
       userObject.put("password_salt", Base64.getEncoder().encodeToString(salt));
       userObject.put("password_hash", Base64.getEncoder().encodeToString(hash));
       userObject.put("public_key", req.getValue("public_key"));
+      userObject.put("private_key_enc", req.getValue("private_key_enc"));
 
       JsonObject insertOp = new JsonObject().put("table", "users").put("data", userObject);
       vertx.eventBus().send(EventBusAddress.DATABASE_INSERT, insertOp, res ->
@@ -144,31 +117,6 @@ public class AuthVerticle extends AbstractVerticle {
         JsonObject user = ((JsonObject) res.result().body()).getJsonArray("rows").getJsonObject(0);
         future.complete(new JsonObject().put("status", "ok").put("user", user));
       });
-    });
-
-    return future;
-  }
-
-  private Future<Integer> getUserIDBySessionToken(String sessionToken) {
-    Future<Integer> future = Future.future();
-
-    JsonObject query = new JsonObject()
-            .put("access_token", sessionToken)
-            .put("valid_until", System.currentTimeMillis());
-    JsonObject getOp = new JsonObject()
-            .put("table", "sessions")
-            .put("query", query)
-            .put("query_conditions", new JsonObject().put("valid_until", "<="))
-            .put("select_fields", new JsonArray().add("user_id"))
-            .put("limit", 1);
-    vertx.eventBus().send(EventBusAddress.DATABASE_GET, getOp, res -> {
-      JsonArray rows = ((JsonObject) res.result().body()).getJsonArray("rows");
-      if (rows.size() == 0) {
-        future.fail("invalid_token");
-        return;
-      }
-      JsonObject session = rows.getJsonObject(0);
-      future.complete(session.getInteger("user_id"));
     });
 
     return future;

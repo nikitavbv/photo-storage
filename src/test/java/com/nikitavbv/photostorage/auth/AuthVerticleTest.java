@@ -1,10 +1,7 @@
 package com.nikitavbv.photostorage.auth;
 
 import com.nikitavbv.photostorage.EventBusAddress;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.impl.MessageImpl;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -54,6 +51,7 @@ public class AuthVerticleTest {
     req.put("username", "testuser");
     req.put("password", "testpassword");
     req.put("public_key", "01234567890123456");
+    req.put("private_key_enc", "01234567890123456");
     vertx.eventBus().consumer(EventBusAddress.DATABASE_INSERT, obj -> {
       JsonObject objToInsert = ((JsonObject) obj.body());
       JsonObject data = objToInsert.getJsonObject("data");
