@@ -8,14 +8,15 @@ import { AuthGuard } from "./_guard";
 import { AuthenticationService, PageTitleService } from "./_services";
 import { JwtInterceptor } from "./_helpers";
 import { AppComponent } from './app.component';
-import { LandingComponent } from "./landing";
+import { AuthComponent, LandingComponent } from "./landing";
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
 
-    LandingComponent
+    LandingComponent,
+    AuthComponent
   ],
   imports: [
     BrowserModule,
