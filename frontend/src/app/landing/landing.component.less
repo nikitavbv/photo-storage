@@ -1,1 +1,52 @@
 @import '../variables.less';
+
+@auth_section_width: 400px;
+
+:host {
+    display: flex;
+    flex-direction: row;
+}
+
+.intro, auth {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.intro {
+    left: 0;
+    right: @auth_section_width;
+}
+
+auth {
+    right: 0;
+    width: @auth_section_width;
+}
+
+.intro {
+    background-color: @primary_color;
+    color: white;
+    font-weight: 100;
+    padding-left: 40px;
+}
+
+.intro-header {
+    margin-top: 30vh;
+    font-size: 60pt;
+}
+
+.intro-header-sub {
+    padding-left: 4px;
+    width: fit-content;
+    font-size: 20pt;
+    overflow: hidden;
+    border-right: .1em solid @secondary_color;
+    white-space: nowrap;
+    animation: blink-caret .75s step-end infinite;
+}
+  
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: @secondary_color; }
+}
