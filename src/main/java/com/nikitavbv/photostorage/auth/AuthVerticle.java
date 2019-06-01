@@ -6,6 +6,7 @@ import static com.kosprov.jargon2.api.Jargon2.jargon2Verifier;
 import com.kosprov.jargon2.api.Jargon2;
 import com.nikitavbv.photostorage.ApiVerticle;
 import com.nikitavbv.photostorage.EventBusAddress;
+import com.nikitavbv.photostorage.models.ApplicationUser;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
@@ -67,7 +68,12 @@ public class AuthVerticle extends ApiVerticle {
     JsonObject getOp = new JsonObject()
             .put("table", "users")
             .put("query", query)
-            .put("select_fields", new JsonArray().add("id").add("password_salt").add("password_hash"))
+            .put("select_fields", new JsonArray()
+                    .add("id")
+                    .add("password_salt")
+                    .add("password_hash")
+                    .add("private_key_enc")
+            )
             .put("limit", 1);
     vertx.eventBus().send(EventBusAddress.DATABASE_GET, getOp, res -> {
       JsonArray rows = ((JsonObject) res.result().body()).getJsonArray("rows");
@@ -76,20 +82,21 @@ public class AuthVerticle extends ApiVerticle {
         return;
       }
 
-      JsonObject user = rows.getJsonObject(0);
+      ApplicationUser user = new ApplicationUser(rows.getJsonObject(0));
 
-      byte[] salt = Base64.getDecoder().decode(user.getString("password_salt"));
-      byte[] hash = Base64.getDecoder().decode(user.getString("password_hash"));
+      byte[] salt = user.passphraseSaltBytes();
+      byte[] hash = user.passphraseHashBytes();
       byte[] password = req.getString("password").getBytes();
 
       verifyPassword(password, hash, salt).setHandler(verifyPasswordResult -> {
         if (!verifyPasswordResult.result()) {
           result.complete(new JsonObject().put("status", "error").put("error", "password_mismatch"));
         } else {
-          startSession(user.getInteger("id"), req.getString("ip"), req.getString("user_agent"))
+          startSession(user.getID(), req.getString("ip"), req.getString("user_agent"))
                   .setHandler(startSessionResult -> result.complete(new JsonObject()
                           .put("status", "ok")
                           .put("access_token", startSessionResult.result())
+                          .put("mater_key_enc", user.masterKey())
                   ));
         }
       });

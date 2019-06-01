@@ -1,4 +1,5 @@
 import {Component, OnDestroy, OnInit} from "@angular/core";
+import {AuthenticationService} from "../_services";
 
 @Component({
   templateUrl: 'landing.component.html',
@@ -22,9 +23,11 @@ export class LandingComponent implements OnInit, OnDestroy {
   readonly ERASING_SPEED = 50;
   readonly SUBHEADER_ROTATION_INTERVAL = 5000;
 
-  typingTimeoutID: number;
+  typingTimeoutID?: number = undefined;
   subHeaderNextText = 'Stored here.';
   subHeaderText = '';
+
+  constructor(private auth: AuthenticationService) {}
 
   ngOnInit(): void {
     this.typingTimeoutID = setTimeout(this.updateTyping.bind(this), 150);
