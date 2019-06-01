@@ -8,20 +8,26 @@ import { AuthGuard } from "./_guard";
 import { AuthenticationService, PageTitleService } from "./_services";
 import { JwtInterceptor } from "./_helpers";
 import { AppComponent } from './app.component';
-import { AuthComponent, LandingComponent } from "./landing";
+import {AuthComponent, LandingComponent, SignInComponent} from "./landing";
+import {SignUpComponent} from "./landing/auth/sign-up/sign-up.component";
+import {FormsModule} from "@angular/forms";
+import {HomeComponent} from "./home";
 
 @NgModule({
   declarations: [
+    AuthComponent,
     AppComponent,
     HeaderComponent,
-
+    HomeComponent,
     LandingComponent,
-    AuthComponent
+    SignInComponent,
+    SignUpComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    FormsModule,
   ],
   providers: [
     AuthGuard,

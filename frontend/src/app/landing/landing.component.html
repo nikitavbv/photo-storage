@@ -1,6 +1,8 @@
-<div class="intro">
+<div *ngIf="!auth.isLoggedIn()" class="intro">
   <div class="intro-header">Your photos</div>
-  <div class="intro-header-sub">Stored securely</div>
+  <div class="intro-header-sub">{{ subHeaderText }}</div>
 </div>
 
-<auth></auth>
+<auth *ngIf="!auth.isLoggedIn()"></auth>
+
+<home *ngIf="auth.isLoggedIn()"></home>

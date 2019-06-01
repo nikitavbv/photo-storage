@@ -24,12 +24,16 @@
             "tsConfig": "src/tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
             ],
             "styles": [
               "src/styles.less"
             ],
-            "scripts": [],
+            "scripts": [
+              "src/assets/cryptico.min.js",
+              "src/assets/scrypt.js",
+              "src/assets/buffer.js"
+            ],
             "es5BrowserSupport": true
           },
           "configurations": {

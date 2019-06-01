@@ -1,1 +1,11 @@
-auth
+<!--suppress HtmlFormInputWithoutLabel -->
+<sign-in id="sign-in" *ngIf="state == STATE_SIGN_IN"></sign-in>
+<sign-up id="sign-up" *ngIf="state == STATE_SIGN_UP" (signedUp)="state = STATE_SIGN_IN" ></sign-up>
+
+<a class="auth-switch-link" href="#sign-up" *ngIf="state == STATE_SIGN_IN" (click)="state = STATE_SIGN_UP">
+  First time here? Sign-up.
+</a>
+
+<a class="auth-switch-link" href="#sign-in" *ngIf="state == STATE_SIGN_UP" (click)="state = STATE_SIGN_IN">
+  Already a user? Sign-in.
+</a>
