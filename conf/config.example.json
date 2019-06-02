@@ -1,0 +1,3 @@
+{
+  "storage.gcs.bucket_name": "some-bucket-at-gcs"
+}

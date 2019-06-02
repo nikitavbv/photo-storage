@@ -4,6 +4,7 @@ import com.nikitavbv.photostorage.ApiVerticle;
 import com.nikitavbv.photostorage.EventBusAddress;
 import com.nikitavbv.photostorage.models.ApplicationUser;
 import com.nikitavbv.photostorage.storage.FilesystemStorageVerticle;
+import com.nikitavbv.photostorage.storage.GoogleCloudStorageVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -12,7 +13,7 @@ import java.util.UUID;
 
 public class PhotoUploadVerticle extends ApiVerticle {
 
-  private static final String DEFAULT_STORAGE_DRIVER = FilesystemStorageVerticle.DRIVER_NAME;
+  private static final String DEFAULT_STORAGE_DRIVER = GoogleCloudStorageVerticle.DRIVER_NAME;
 
   private String storageDriver;
 
