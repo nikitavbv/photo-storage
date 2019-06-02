@@ -1,18 +1,4 @@
-<div class="header">
-  <!--suppress HtmlFormInputWithoutLabel -->
-  <input class="search" placeholder="Search anything..." />
-  <div class="notif slide-from-top">
-    Uploading 732 photos...
-  </div>
-  <div class="right-nav">
-    <button>Upload</button>
-    <button>Create album</button>
-    <div class="upload-progress-bar">
-      <div class="upload-progress" style="width: 70%"></div>
-    </div>
-    <button>Settings</button>
-  </div>
-</div>
+<header></header>
 
 <div class="tiles">
   <div class="tile">
@@ -92,6 +78,6 @@
   </div>
 </div>
 
-<div class="drop-prompt">
+<div *ngIf="photoDragInProgress" class="drop-prompt">
   Drop your photos here to upload...
 </div>

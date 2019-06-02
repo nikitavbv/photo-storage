@@ -3,15 +3,14 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 
-import { HeaderComponent } from "./_shared/layout";
 import { AuthGuard } from "./_guard";
-import { AuthenticationService, PageTitleService } from "./_services";
+import {AuthenticationService, CryptoService, PageTitleService, PhotoService} from "./_services";
 import { JwtInterceptor } from "./_helpers";
 import { AppComponent } from './app.component';
 import {AuthComponent, LandingComponent, SignInComponent} from "./landing";
-import {SignUpComponent} from "./landing/auth/sign-up/sign-up.component";
+import {SignUpComponent} from "./landing/auth/sign-up";
 import {FormsModule} from "@angular/forms";
-import {HomeComponent} from "./home";
+import {HeaderComponent, HomeComponent} from "./home";
 
 @NgModule({
   declarations: [
@@ -32,7 +31,9 @@ import {HomeComponent} from "./home";
   providers: [
     AuthGuard,
     AuthenticationService,
+    CryptoService,
     PageTitleService,
+    PhotoService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

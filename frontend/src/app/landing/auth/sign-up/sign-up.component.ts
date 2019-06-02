@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Output} from "@angular/core";
-import {AuthenticationService} from "../../../_services";
+import {AuthenticationService, CryptoService} from "../../../_services";
 
 declare const cryptico: any;
 declare const scrypt: any;
@@ -19,7 +19,7 @@ export class SignUpComponent {
   passphrase: string = '';
   passphraseRepeat: string = '';
 
-  constructor(private auth: AuthenticationService) {}
+  constructor(private auth: AuthenticationService, private crypto: CryptoService) {}
 
   signUp(): void {
     let aesEnc: string = undefined;
@@ -33,7 +33,7 @@ export class SignUpComponent {
       }
     });
 
-    const aesKey = cryptico.bytes2string(cryptico.generateAESKey());
+    const masterKey =
     const key = cryptico.generateRSAKey(this.passphrase, this.auth.RSA_BITS);
     publicKey = cryptico.publicKeyString(key);
     aesEnc = cryptico.encrypt(aesKey, publicKey).cipher;
