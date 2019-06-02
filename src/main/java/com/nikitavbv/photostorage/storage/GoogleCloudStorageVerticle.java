@@ -1,5 +1,6 @@
 package com.nikitavbv.photostorage.storage;
 
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
@@ -10,16 +11,19 @@ import com.google.cloud.storage.StorageOptions;
 import com.nikitavbv.photostorage.ApiVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class GoogleCloudStorageVerticle extends ApiVerticle {
 
@@ -27,15 +31,24 @@ public class GoogleCloudStorageVerticle extends ApiVerticle {
   private Storage storage;
   private Bucket bucket;
 
-  public GoogleCloudStorageVerticle() {
+  @Override
+  public void start() {
     ConfigRetriever.create(vertx).getConfig(ar -> {
       JsonObject config = ar.result();
-      this.storage = StorageOptions.getDefaultInstance().getService();
-      this.bucket = storage.create(BucketInfo.of(config.getString("storage.gcs.bucket_name")));
+      vertx.executeBlocking((Handler<Future<Boolean>>) future -> {
+        try {
+          this.storage = StorageOptions.newBuilder()
+            .setCredentials(ServiceAccountCredentials.fromStream(new FileInputStream(config.getString("storage.gcs.credentials.file"))))
+            .setProjectId(config.getString("storage.gcs.project_id"))
+            .build()
+            .getService();
+          this.bucket = storage.get(config.getString("storage.gcs.bucket_name"));
+          future.complete(true);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }, (result) -> {});
     });
-  }
-
-  public void start() {
     vertx.eventBus().consumer("photo.driver." + DRIVER_NAME + ".api",
             addJsonConsumer(this::uploadPhoto, Arrays.asList("photo_data_enc", "photo_id")));
     vertx.eventBus().consumer("photo.driver." + DRIVER_NAME + ".download",
@@ -47,11 +60,12 @@ public class GoogleCloudStorageVerticle extends ApiVerticle {
     String photoID = uploadPhotoReq.getString("photo_id");
     byte[] photoData = Base64.getDecoder().decode(uploadPhotoReq.getString("photo_data_enc"));
 
-    BlobInfo blobInfo = storage.create(BlobInfo.newBuilder(bucket.getName(), photoID)
-      .setAcl(new ArrayList<>(Arrays.asList(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER))))
-      .build(), photoData);
+    vertx.executeBlocking((Handler<Future<Boolean>>) fut -> {
+      BlobInfo blobInfo = storage.create(BlobInfo.newBuilder(bucket.getName(), photoID).build(), photoData);
+      future.complete(new JsonObject().put("key", photoID).put("link", blobInfo.getMediaLink()));
+      fut.complete(true);
+    }, (result) -> {});
 
-    future.complete(new JsonObject().put("key", photoID).put("link", blobInfo.getMediaLink()));
 
     return future;
   }
