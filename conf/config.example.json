@@ -1,3 +1,5 @@
 {
-  "storage.gcs.bucket_name": "some-bucket-at-gcs"
+  "storage.gcs.bucket_name": "some-bucket-at-gcs",
+  "storage.gcs.credentials.file": ".gcp.credentials.app.json",
+  "storage.gcs.project_id": "some-project-id"
 }
