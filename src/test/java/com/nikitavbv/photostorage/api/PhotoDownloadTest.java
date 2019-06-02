@@ -1,6 +1,7 @@
 package com.nikitavbv.photostorage.api;
 
 import com.nikitavbv.photostorage.EventBusAddress;
+import com.nikitavbv.photostorage.utils.CryptoVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -21,6 +22,7 @@ public class PhotoDownloadTest {
   public void deployVerticle(TestContext context) {
     vertx = Vertx.vertx();
     vertx.deployVerticle(PhotoDownloadVerticle.class.getName(), context.asyncAssertSuccess());
+    vertx.deployVerticle(CryptoVerticle.class.getName(), context.asyncAssertSuccess());
   }
 
   @After
@@ -34,7 +36,7 @@ public class PhotoDownloadTest {
 
     String photoID = "67dab16a-8cbf-4110-9af4-d45c37d48031";
     JsonObject photoDownloadRequest = new JsonObject();
-    photoDownloadRequest.put("access_token", "dummy_access_token");
+    photoDownloadRequest.put("access_token", "fcrJKhGoGnjOyOKZ25up0A==");
     photoDownloadRequest.put("photo_id", photoID);
 
     vertx.eventBus().consumer(EventBusAddress.DATABASE_GET, getReq -> {
@@ -49,7 +51,7 @@ public class PhotoDownloadTest {
         case "sessions":
           JsonObject sessionObj = new JsonObject();
           sessionObj.put("user_id", 42);
-          sessionObj.put("access_token", "dummy_access_token");
+          sessionObj.put("access_token", "87bc+2E1VhS6Uxl2Q1aRlA==");
           sessionObj.put("valid_until", System.currentTimeMillis() + 1000 * 60 * 10);
           getReq.reply(new JsonObject().put("rows", new JsonArray().add(sessionObj)));
           break;
