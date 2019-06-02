@@ -30,15 +30,23 @@ export class AuthenticationService {
   }
 
   signIn(username: string, password: string): Observable<AuthenticationResponse> {
-    return this.httpClient.post<AuthenticationResponse>('/api/v1/auth', {
-      username, password
-    }).pipe(map((res: AuthenticationResponse) => {
-      const key = cryptico.generateRSAKey(password, this.RSA_BITS);
-      localStorage.setItem('access_token', res.access_token);
-      localStorage.setItem('rsa_key', JSON.stringify(key));
-      localStorage.setItem('master_key', cryptico.decrypt(res.master_key_enc, key));
-      return res;
-    }));
+    const resObservable = Observable.create();
+
+    this.hashPassword(password, username, hashedPassword => {
+      this.httpClient.post<AuthenticationResponse>('/api/v1/auth', {
+        username, password: hashedPassword
+      }).pipe(map((res: AuthenticationResponse) => {
+        const key = cryptico.generateRSAKey(password, this.RSA_BITS);
+        console.log('master_key_enc:', res.master_key_enc);
+        localStorage.setItem('access_token', res.access_token);
+        localStorage.setItem('rsa_key', JSON.stringify(key));
+        console.log(cryptico.string2bytes(cryptico.decrypt(res.master_key_enc, key).plaintext));
+        localStorage.setItem('master_key', cryptico.decrypt(res.master_key_enc, key).plaintext);
+        return res;
+      })).subscribe(resObservable);
+    });
+
+    return resObservable;
   }
 
   hashPassword(password: string, salt: string, callback: (hashedPassword: string) => void) {
