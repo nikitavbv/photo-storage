@@ -1,1 +1,187 @@
-// silence is golden
+@import '../variables.less';
+
+:host {
+  padding: 0 10px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  line-height: 30px;
+  height: 30px;
+  font-size: 14pt;
+  font-weight: 100;
+  font-family: 'Open Sans', sans-serif;
+
+  div {
+    display: inline-block;
+  }
+
+  input {
+    border: 0;
+    height: 30px;
+    font-size: inherit;
+    font-family: inherit;
+    margin: 8px 0;
+    padding: 6px;
+    outline: none;
+    font-weight: inherit;
+    background-color: @white_darker_background;
+    width: 565px;
+  }
+
+  .notif {
+    color: @primary_color;
+    font-weight: 500;
+    line-height: 32px;
+    height: 32px;
+    vertical-align: middle;
+    padding: 12px 0;
+    user-select: none;
+  }
+
+  .slide-from-top {
+    animation: slide-in 0.5s forwards;
+  }
+
+  .slide-to-top {
+    animation: slide-out 0.5s forwards;
+  }
+
+  @keyframes slide-in {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(0%); }
+  }
+
+  @keyframes slide-out {
+    100% { transform: translateY(-100%); }
+    0% { transform: translateY(0%); }
+  }
+
+  .right-nav {
+    margin: 8px 12px;
+    line-height: 30px;
+    height: 30px;
+  }
+
+  button {
+    font-size: inherit;
+    border: 0;
+    background-color: white;
+    font-weight: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    line-height: 30px;
+    padding: 6px 12px;
+    vertical-align: middle;
+    transition: all 0.4s ease-out;
+    outline: none;
+    margin: 0 8px;
+  }
+
+  button:hover {
+    color: @primary_color;
+    background-color: @white_darker_background;
+  }
+}
+
+.tiles {
+  margin: 40px 10px 0 0;
+}
+
+.tile {
+  display: inline-block;
+  margin: 0 10px 0 0;
+  width: 180px;
+  height: 180px;
+  color: white;
+  border-radius: 4px;
+  font-size: 20pt;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 500;
+  text-align: center;
+  line-height: 180px;
+  user-select: none;
+  background-image: linear-gradient(
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.6)
+  ), url("http://lorempixel.com/90/90/cats"),
+  url("http://lorempixel.com/90/90/nature"),
+  url("http://lorempixel.com/90/90/people"),
+  url("http://lorempixel.com/90/90/technics"),
+  linear-gradient(
+    rgba(0, 150, 136, 0.7),
+    rgba(0, 150, 136, 0.7)
+  );
+  background-repeat: no-repeat,
+  no-repeat,
+  no-repeat, no-repeat;
+  background-position: 0 0, bottom right, bottom left, top left, top right, 0 180px;
+  transition: all 0.4s ease-out;
+  cursor: pointer;
+}
+
+.tile:hover {
+  background-position: 0 -180px, 90px -90px, 0 -90px, 0 -180px, 90px -180px, 0 0px;
+}
+
+.gallery {
+  margin: 0;
+  width: 100%;
+}
+
+.gallery-block {
+  margin: 10px 0;
+}
+
+.block-label {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14pt;
+  font-weight: 700;
+  padding: 4px 0;
+  user-select: none;
+  margin: 0 0 8px 0;
+}
+
+.block-photos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.block-photos::after {
+  content: "";
+  flex: auto;
+}
+
+.photo {
+  border-radius: 4px;
+  height: 180px;
+  width: 180px;
+  margin: 0 5px 5px 0;
+  cursor: pointer;
+  background-size: cover;
+  background-color: @white_darker_background;
+}
+
+.drop-prompt {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  user-select: none;
+  text-align: center;
+  line-height: 100vh;
+  background: linear-gradient(
+    rgba(0, 150, 136, 0.9),
+    rgba(0, 150, 136, 0.9)
+  );
+  color: white;
+  font-size: 40pt;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 100;
+}
