@@ -1,7 +1,11 @@
 package com.nikitavbv.photostorage;
 
+import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
+
+import com.kosprov.jargon2.api.Jargon2;
 import com.nikitavbv.photostorage.models.ApplicationUser;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
@@ -65,26 +69,27 @@ public abstract class ApiVerticle extends AbstractVerticle {
   protected Future<Integer> getUserIDBySessionToken(String sessionToken) {
     Future<Integer> future = Future.future();
 
-    JsonObject query = new JsonObject()
-            .put("access_token", sessionToken)
-            .put("valid_until", System.currentTimeMillis());
-    JsonObject getOp = new JsonObject()
-            .put("table", "sessions")
-            .put("query", query)
-            .put("query_conditions", new JsonObject().put("valid_until", "<="))
-            .put("select_fields", new JsonArray().add("user_id"))
-            .put("limit", 1);
-    vertx.eventBus().send(EventBusAddress.DATABASE_GET, getOp, res -> {
-      JsonArray rows = ((JsonObject) res.result().body()).getJsonArray("rows");
-      if (rows.size() == 0) {
-        future.fail("invalid_token");
-        return;
-      }
-      JsonObject session = rows.getJsonObject(0);
-      future.complete(session.getInteger("user_id"));
+    vertx.eventBus().send(EventBusAddress.CRYPTO_HASH_SESSION_TOKEN, sessionToken, (AsyncResult<Message<String>> hashedToken) -> {
+      JsonObject query = new JsonObject()
+              .put("access_token", hashedToken.result().body())
+              .put("valid_until", System.currentTimeMillis());
+      JsonObject getOp = new JsonObject()
+              .put("table", "sessions")
+              .put("query", query)
+              .put("query_conditions", new JsonObject().put("valid_until", "<="))
+              .put("select_fields", new JsonArray().add("user_id"))
+              .put("limit", 1);
+      vertx.eventBus().send(EventBusAddress.DATABASE_GET, getOp, res -> {
+        JsonArray rows = ((JsonObject) res.result().body()).getJsonArray("rows");
+        if (rows.size() == 0) {
+          future.fail("invalid_token");
+          return;
+        }
+        JsonObject session = rows.getJsonObject(0);
+        future.complete(session.getInteger("user_id"));
+      });
     });
 
     return future;
   }
-
 }

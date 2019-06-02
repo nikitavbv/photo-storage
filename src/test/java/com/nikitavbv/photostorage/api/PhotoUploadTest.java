@@ -1,6 +1,7 @@
 package com.nikitavbv.photostorage.api;
 
 import com.nikitavbv.photostorage.EventBusAddress;
+import com.nikitavbv.photostorage.utils.CryptoVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -37,6 +38,7 @@ public class PhotoUploadTest {
   public void deployVerticle(TestContext context) {
     vertx = Vertx.vertx();
     vertx.deployVerticle(PhotoUploadVerticle.class.getName(), context.asyncAssertSuccess());
+    vertx.deployVerticle(CryptoVerticle.class.getName(), context.asyncAssertSuccess());
   }
 
   @After
@@ -78,7 +80,7 @@ public class PhotoUploadTest {
     byte[] encryptedImageKey = cipher.doFinal(keyBytes);
 
     JsonObject photoUploadRequest = new JsonObject();
-    photoUploadRequest.put("access_token", "dummy_access_token");
+    photoUploadRequest.put("access_token", "fcrJKhGoGnjOyOKZ25up0A==");
     photoUploadRequest.put("photo_data_enc", Base64.getEncoder().encodeToString(encryptedPhoto));
     photoUploadRequest.put("photo_data_iv", Base64.getEncoder().encodeToString(iv));
     photoUploadRequest.put("key_enc", Base64.getEncoder().encodeToString(encryptedImageKey));
@@ -93,7 +95,7 @@ public class PhotoUploadTest {
       } else if (getReqJson.getString("table").equals("sessions")) {
         JsonObject sessionObj = new JsonObject();
         sessionObj.put("user_id", 42);
-        sessionObj.put("access_token", "dummy_access_token");
+        sessionObj.put("access_token", "fcrJKhGoGnjOyOKZ25up0A==");
         sessionObj.put("valid_until", System.currentTimeMillis() + 1000 * 60 * 10);
         getReq.reply(new JsonObject().put("rows", new JsonArray().add(sessionObj)));
       } else {

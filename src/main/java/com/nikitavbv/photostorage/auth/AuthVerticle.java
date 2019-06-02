@@ -1,19 +1,14 @@
 package com.nikitavbv.photostorage.auth;
 
-import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
-import static com.kosprov.jargon2.api.Jargon2.jargon2Verifier;
-
-import com.kosprov.jargon2.api.Jargon2;
 import com.nikitavbv.photostorage.ApiVerticle;
 import com.nikitavbv.photostorage.EventBusAddress;
 import com.nikitavbv.photostorage.models.ApplicationUser;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
@@ -22,8 +17,6 @@ import java.util.Collections;
 public class AuthVerticle extends ApiVerticle {
 
   private static final int SALT_LENGTH = 16;
-  private static final int HASH_LENGTH = 16;
-  private static final int HASH_MEMORY_COST = 65536; // 64MB
   private static final int SESSION_TOKEN_LENGTH = 16;
   private static final long SESSION_TOKEN_LIFETIME = 1000 * 60 * 60 * 24; // 1 day
 
@@ -46,11 +39,13 @@ public class AuthVerticle extends ApiVerticle {
   private Future<JsonObject> createUser(JsonObject req) {
     Future<JsonObject> result = Future.future();
     byte[] salt = generateRandomSalt();
-    hashPassword(req.getString("password").getBytes(), salt, hash -> {
+    vertx.eventBus().send(EventBusAddress.CRYPTO_HASH_PASSWORD, new JsonObject()
+            .put("password", req.getString("password"))
+            .put("salt", salt), (AsyncResult<Message<String>> hashedPassword) -> {
       JsonObject userObject = new JsonObject();
       userObject.put("username", req.getValue("username"));
       userObject.put("password_salt", Base64.getEncoder().encodeToString(salt));
-      userObject.put("password_hash", Base64.getEncoder().encodeToString(hash));
+      userObject.put("password_hash", hashedPassword.result().body());
       userObject.put("public_key", req.getValue("public_key"));
       userObject.put("private_key_enc", req.getValue("private_key_enc"));
 
@@ -88,8 +83,11 @@ public class AuthVerticle extends ApiVerticle {
       byte[] hash = user.passphraseHashBytes();
       byte[] password = req.getString("password").getBytes();
 
-      verifyPassword(password, hash, salt).setHandler(verifyPasswordResult -> {
-        if (!verifyPasswordResult.result()) {
+      vertx.eventBus().send(EventBusAddress.CRYPTO_PASSWORD_HASH_VERIFY, new JsonObject()
+              .put("password", password)
+              .put("hash", hash)
+              .put("salt", salt), (AsyncResult<Message<JsonObject>> verifyResult) -> {
+        if (!verifyResult.result().body().getBoolean("result")) {
           result.complete(new JsonObject().put("status", "error").put("error", "password_mismatch"));
         } else {
           startSession(user.getID(), req.getString("ip"), req.getString("user_agent"))
@@ -134,60 +132,21 @@ public class AuthVerticle extends ApiVerticle {
 
     final byte[] token = generateRandomSessionToken();
     final String encodedToken = Base64.getEncoder().encodeToString(token);
-    JsonObject session = new JsonObject()
-            .put("user_id", userID)
-            .put("access_token", encodedToken)
-            .put("valid_until", System.currentTimeMillis() + SESSION_TOKEN_LIFETIME)
-            .put("ip", ip)
-            .put("user_agent", userAgent);
-    JsonObject insertOp = new JsonObject()
-            .put("table", "sessions")
-            .put("data", session);
-    vertx.eventBus().send(EventBusAddress.DATABASE_INSERT, insertOp, res -> future.complete(encodedToken));
+
+    vertx.eventBus().send(EventBusAddress.CRYPTO_HASH_SESSION_TOKEN, encodedToken, (AsyncResult<Message<String>> hashedToken) -> {
+      JsonObject session = new JsonObject()
+              .put("user_id", userID)
+              .put("access_token", hashedToken.result().body())
+              .put("valid_until", System.currentTimeMillis() + SESSION_TOKEN_LIFETIME)
+              .put("ip", ip)
+              .put("user_agent", userAgent);
+      JsonObject insertOp = new JsonObject()
+              .put("table", "sessions")
+              .put("data", session);
+      vertx.eventBus().send(EventBusAddress.DATABASE_INSERT, insertOp, res -> future.complete(encodedToken));
+    });
 
     return future;
-  }
-
-  private void hashPassword(byte[] password, byte[] salt, Handler<byte[]> handler) {
-    vertx.executeBlocking((Handler<Future<byte[]>>) future -> {
-      byte[] hashedPassword = sha512(password);
-      Jargon2.Hasher hasher = jargon2Hasher()
-              .type(Jargon2.Type.ARGON2d)
-              .memoryCost(HASH_MEMORY_COST)
-              .timeCost(3)
-              .parallelism(4)
-              .salt(salt)
-              .hashLength(HASH_LENGTH);
-
-      future.complete(hasher.password(hashedPassword).rawHash());
-    }, res -> handler.handle(res.result()));
-  }
-
-  private Future<Boolean> verifyPassword(byte[] password, byte[] hash, byte[] salt) {
-    Future<Boolean> result = Future.future();
-
-    vertx.executeBlocking((Handler<Future<Boolean>>) future -> {
-            byte[] hashedPassword = sha512(password);
-            future.complete(jargon2Verifier()
-                    .type(Jargon2.Type.ARGON2d)
-                    .memoryCost(HASH_MEMORY_COST)
-                    .timeCost(3)
-                    .parallelism(4)
-                    .hash(hash)
-                    .salt(salt)
-                    .password(hashedPassword)
-                    .verifyRaw());
-    }, res -> result.complete(res.result()));
-
-    return result;
-  }
-
-  byte[] sha512(byte[] input) {
-    try {
-      return MessageDigest.getInstance("SHA-512").digest(input);
-    } catch(NoSuchAlgorithmException e) {
-      throw new AssertionError(e);
-    }
   }
 
   private byte[] generateRandomSalt() {

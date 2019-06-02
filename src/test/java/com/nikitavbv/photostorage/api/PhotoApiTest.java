@@ -1,6 +1,7 @@
 package com.nikitavbv.photostorage.api;
 
 import com.nikitavbv.photostorage.EventBusAddress;
+import com.nikitavbv.photostorage.utils.CryptoVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -21,6 +22,7 @@ public class PhotoApiTest {
   public void deployVerticle(TestContext context) {
     vertx = Vertx.vertx();
     vertx.deployVerticle(PhotoApiVericle.class.getName(), context.asyncAssertSuccess());
+    vertx.deployVerticle(CryptoVerticle.class.getName(), context.asyncAssertSuccess());
   }
 
   @After
@@ -44,7 +46,7 @@ public class PhotoApiTest {
         case "sessions":
           JsonObject sessionObj = new JsonObject();
           sessionObj.put("user_id", 42);
-          sessionObj.put("access_token", "dummy_access_token");
+          sessionObj.put("access_token", "87bc+2E1VhS6Uxl2Q1aRlA==");
           sessionObj.put("valid_until", System.currentTimeMillis() + 1000 * 60 * 10);
           getReq.reply(new JsonObject().put("rows", new JsonArray().add(sessionObj)));
           break;
@@ -73,7 +75,7 @@ public class PhotoApiTest {
     });
 
     JsonObject getMyPhotosReq = new JsonObject();
-    getMyPhotosReq.put("access_token", "dummy_access_token");
+    getMyPhotosReq.put("access_token", "fcrJKhGoGnjOyOKZ25up0A==");
     vertx.eventBus().send(EventBusAddress.API_GET_MY_PHOTOS, getMyPhotosReq, getMyPhotosResp -> {
       JsonObject myPhotosResult = ((JsonObject) getMyPhotosResp.result().body());
       context.assertEquals("ok", myPhotosResult.getString("status"));

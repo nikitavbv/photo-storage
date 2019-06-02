@@ -12,4 +12,8 @@ public class EventBusAddress {
   public static final String DATABASE_INSERT = "database.insert";
   public static final String DATABASE_GET = "database.get";
 
+  public static final String CRYPTO_HASH_SESSION_TOKEN = "crypto.hash.token";
+  public static final String CRYPTO_HASH_PASSWORD = "crypto.hash.password";
+  public static final String CRYPTO_PASSWORD_HASH_VERIFY = "crypto.hash.password.verify";
+
 }
