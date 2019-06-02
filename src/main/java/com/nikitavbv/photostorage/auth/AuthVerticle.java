@@ -96,7 +96,7 @@ public class AuthVerticle extends ApiVerticle {
                   .setHandler(startSessionResult -> result.complete(new JsonObject()
                           .put("status", "ok")
                           .put("access_token", startSessionResult.result())
-                          .put("mater_key_enc", user.masterKey())
+                          .put("master_key_enc", user.masterKey())
                   ));
         }
       });
