@@ -1,4 +1,4 @@
-package com.nikitavbv.photostorage.auth;
+package com.nikitavbv.photostorage.utils;
 
 import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
 import static com.kosprov.jargon2.api.Jargon2.jargon2Verifier;
@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.kosprov.jargon2.api.Jargon2;
+import com.nikitavbv.photostorage.utils.CryptoVerticle;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -71,7 +72,7 @@ public class CryptoTest {
 
   @Test
   public void testPasswordVerify() {
-    AuthVerticle verticle = new AuthVerticle();
+    CryptoVerticle verticle = new CryptoVerticle();
     Jargon2.RawVerifier verifier = jargon2Verifier()
             .type(Jargon2.Type.ARGON2d)
             .memoryCost(65536)

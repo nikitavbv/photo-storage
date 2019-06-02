@@ -1,6 +1,7 @@
 package com.nikitavbv.photostorage.auth;
 
 import com.nikitavbv.photostorage.EventBusAddress;
+import com.nikitavbv.photostorage.utils.CryptoVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -21,6 +22,7 @@ public class AuthVerticleTest {
   public void deployVerticle(TestContext context) {
     vertx = Vertx.vertx();
     vertx.deployVerticle(AuthVerticle.class.getName(), context.asyncAssertSuccess());
+    vertx.deployVerticle(CryptoVerticle.class.getName(), context.asyncAssertSuccess());
   }
 
   @After
