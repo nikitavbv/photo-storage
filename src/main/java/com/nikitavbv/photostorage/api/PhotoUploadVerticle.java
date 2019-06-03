@@ -17,13 +17,23 @@ public class PhotoUploadVerticle extends ApiVerticle {
 
   private String storageDriver;
 
+  PhotoUploadVerticle(String driverName) {
+    super();
+    this.storageDriver = driverName;
+  }
+
+  @SuppressWarnings("unused")
+  public PhotoUploadVerticle() {
+    this(DEFAULT_STORAGE_DRIVER);
+  }
+
   public void start() {
     vertx.eventBus().consumer(EventBusAddress.API_PHOTO_UPLOAD, addJsonConsumer(this::uploadPhoto, Arrays.asList(
         "access_token", "photo_data_enc", "photo_data_iv", "key_enc"
     )));
     ConfigRetriever.create(vertx).getConfig(ar -> {
       JsonObject config = ar.result();
-      storageDriver = config.getString("storage.driver", DEFAULT_STORAGE_DRIVER);
+      storageDriver = config.getString("storage.driver", this.storageDriver);
     });
   }
 

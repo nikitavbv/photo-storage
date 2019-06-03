@@ -1,7 +1,9 @@
 package com.nikitavbv.photostorage.api;
 
 import com.nikitavbv.photostorage.EventBusAddress;
+import com.nikitavbv.photostorage.storage.FilesystemStorageVerticle;
 import com.nikitavbv.photostorage.utils.CryptoVerticle;
+import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -37,7 +39,7 @@ public class PhotoUploadTest {
   @Before
   public void deployVerticle(TestContext context) {
     vertx = Vertx.vertx();
-    vertx.deployVerticle(PhotoUploadVerticle.class.getName(), context.asyncAssertSuccess());
+    vertx.deployVerticle(new PhotoUploadVerticle(FilesystemStorageVerticle.DRIVER_NAME), context.asyncAssertSuccess());
     vertx.deployVerticle(CryptoVerticle.class.getName(), context.asyncAssertSuccess());
   }
 
