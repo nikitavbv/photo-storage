@@ -22,24 +22,24 @@ export class SignUpComponent {
   constructor(private auth: AuthenticationService, private crypto: CryptoService) {}
 
   signUp(): void {
-    let aesEnc: string = undefined;
+    let masterKeyEnc: string = undefined;
     let publicKey: string = undefined;
     let hashedPassword: string = '';
 
     this.auth.hashPassword(this.passphrase, this.username, result => {
       hashedPassword = result;
-      if (aesEnc) {
-        this.makeAuthRequest(this.username, hashedPassword, publicKey, aesEnc);
+      if (masterKeyEnc) {
+        this.makeAuthRequest(this.username, hashedPassword, publicKey, masterKeyEnc);
       }
     });
 
-    const masterKey =
+    const masterKey = this.crypto.randomRSAKey();
     const key = cryptico.generateRSAKey(this.passphrase, this.auth.RSA_BITS);
-    publicKey = cryptico.publicKeyString(key);
-    aesEnc = cryptico.encrypt(aesKey, publicKey).cipher;
+    publicKey = cryptico.publicKeyString(masterKey);
+    masterKeyEnc = cryptico.encrypt(masterKey, cryptico.publicKeyString(key)).cipher;
 
     if (hashedPassword) {
-      this.makeAuthRequest(this.username, hashedPassword, publicKey, aesEnc);
+      this.makeAuthRequest(this.username, hashedPassword, publicKey, masterKeyEnc);
     }
   }
 
