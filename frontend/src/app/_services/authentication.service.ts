@@ -72,4 +72,8 @@ export class AuthenticationService {
   isLoggedIn(): boolean {
     return localStorage && localStorage.getItem('access_token') != undefined;
   }
+
+  masterKey(): string {
+    return localStorage.getItem('master_key');
+  }
 }

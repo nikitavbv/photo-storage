@@ -4,6 +4,7 @@ import com.nikitavbv.photostorage.ApiVerticle;
 import com.nikitavbv.photostorage.EventBusAddress;
 import com.nikitavbv.photostorage.models.ApplicationUser;
 import com.nikitavbv.photostorage.storage.FilesystemStorageVerticle;
+import com.nikitavbv.photostorage.storage.GoogleCloudStorageVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -12,9 +13,19 @@ import java.util.UUID;
 
 public class PhotoUploadVerticle extends ApiVerticle {
 
-  private static final String DEFAULT_STORAGE_DRIVER = FilesystemStorageVerticle.DRIVER_NAME;
+  private static final String DEFAULT_STORAGE_DRIVER = GoogleCloudStorageVerticle.DRIVER_NAME;
 
   private String storageDriver;
+
+  PhotoUploadVerticle(String driverName) {
+    super();
+    this.storageDriver = driverName;
+  }
+
+  @SuppressWarnings("unused")
+  public PhotoUploadVerticle() {
+    this(DEFAULT_STORAGE_DRIVER);
+  }
 
   public void start() {
     vertx.eventBus().consumer(EventBusAddress.API_PHOTO_UPLOAD, addJsonConsumer(this::uploadPhoto, Arrays.asList(
@@ -22,7 +33,7 @@ public class PhotoUploadVerticle extends ApiVerticle {
     )));
     ConfigRetriever.create(vertx).getConfig(ar -> {
       JsonObject config = ar.result();
-      storageDriver = config.getString("storage.driver", DEFAULT_STORAGE_DRIVER);
+      storageDriver = config.getString("storage.driver", this.storageDriver);
     });
   }
 
