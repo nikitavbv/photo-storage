@@ -3,6 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {AuthenticationResponse, GenericApiResponse} from "../_models";
 import {map} from "rxjs/operators";
+import {CryptoService} from "./crypto.service";
 
 declare const cryptico: any;
 declare const scrypt: any;
@@ -17,7 +18,7 @@ export class AuthenticationService {
   readonly SCRYPT_P = 1;
   readonly SCRYPT_DKLEN = 32;
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient, private crypto: CryptoService) {}
 
   signUp(username: string, password: string, publicKey: string, privateKeyEnc: string):
     Observable<GenericApiResponse> {
@@ -37,10 +38,7 @@ export class AuthenticationService {
         username, password: hashedPassword
       }).pipe(map((res: AuthenticationResponse) => {
         const key = cryptico.generateRSAKey(password, this.RSA_BITS);
-        console.log('master_key_enc:', res.master_key_enc);
         localStorage.setItem('access_token', res.access_token);
-        localStorage.setItem('rsa_key', JSON.stringify(key));
-        console.log(cryptico.string2bytes(cryptico.decrypt(res.master_key_enc, key).plaintext));
         localStorage.setItem('master_key', cryptico.decrypt(res.master_key_enc, key).plaintext);
         return res;
       })).subscribe(resObservable);

@@ -36,7 +36,7 @@ export class SignUpComponent {
     const masterKey = this.crypto.randomRSAKey();
     const key = cryptico.generateRSAKey(this.passphrase, this.auth.RSA_BITS);
     publicKey = cryptico.publicKeyString(masterKey);
-    masterKeyEnc = cryptico.encrypt(masterKey, cryptico.publicKeyString(key)).cipher;
+    masterKeyEnc = cryptico.encrypt(this.crypto.serializeRSAKey(masterKey), cryptico.publicKeyString(key)).cipher;
 
     if (hashedPassword) {
       this.makeAuthRequest(this.username, hashedPassword, publicKey, masterKeyEnc);
