@@ -26,21 +26,18 @@ export class SignUpComponent {
     let publicKey: string = undefined;
     let hashedPassword: string = '';
 
-    this.auth.hashPassword(this.passphrase, this.username, result => {
-      hashedPassword = result;
-      if (masterKeyEnc) {
-        this.makeAuthRequest(this.username, hashedPassword, publicKey, masterKeyEnc);
-      }
-    });
-
-    const masterKey = this.crypto.randomRSAKey();
-    const key = cryptico.generateRSAKey(this.passphrase, this.auth.RSA_BITS);
-    publicKey = cryptico.publicKeyString(masterKey);
-    masterKeyEnc = cryptico.encrypt(this.crypto.serializeRSAKey(masterKey), cryptico.publicKeyString(key)).cipher;
-
-    if (hashedPassword) {
-      this.makeAuthRequest(this.username, hashedPassword, publicKey, masterKeyEnc);
-    }
+    Promise.all([
+      this.crypto.randomRSAKey(),
+      this.crypto.deriveAESKey(this.passphrase),
+      this.auth.hashPassword(this.passphrase, passwordSalt)
+    ]).then(([masterKey, key, hashedPassword]: any[]) => {
+      Promise.all([
+        this.crypto.encryptPrivateRSAKeyWithAES(masterKey.privateKey, key.key),
+        this.crypto.exportRSAPublicKey(masterKey.publicKey)
+      ]).then(([privateKeyEnc, publicKey]) => {
+        this.makeAuthRequest(this.username, hashedPassword, passwordSalt, publicKey, masterKeyEnc, key.salt);
+      });
+    }).catch(console.error);
   }
 
   makeAuthRequest(username: string, password: string, publicKey: string, masterKey: string): void {

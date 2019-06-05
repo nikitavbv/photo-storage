@@ -33,7 +33,7 @@ export class AuthenticationService {
   signIn(username: string, password: string): Observable<AuthenticationResponse> {
     const resObservable = Observable.create();
 
-    this.hashPassword(password, username, hashedPassword => {
+    this.hashPassword(password, username).then(hashedPassword => {
       this.httpClient.post<AuthenticationResponse>('/api/v1/auth', {
         username, password: hashedPassword
       }).pipe(map((res: AuthenticationResponse) => {
@@ -47,16 +47,18 @@ export class AuthenticationService {
     return resObservable;
   }
 
-  hashPassword(password: string, salt: string, callback: (hashedPassword: string) => void) {
-    const passwordBuffer = new buffer.SlowBuffer(password.normalize('NFKC'));
-    const saltBuffer = new buffer.SlowBuffer(salt.normalize('NFKC'));
-    scrypt(passwordBuffer, saltBuffer, this.SCRYPT_N, this.SCRYPT_R, this.SCRYPT_P, this.SCRYPT_DKLEN,
-      (error, progress, key) => {
-        if (error) {
-          console.error('scrypt error:', error);
-        } else if (key) {
-          callback(btoa(cryptico.bytes2string(key)));
-        }
+  hashPassword(password: string, salt: string) {
+    return new Promise((resolve, reject) => {
+      const passwordBuffer = new buffer.SlowBuffer(password.normalize('NFKC'));
+      const saltBuffer = new buffer.SlowBuffer(salt.normalize('NFKC'));
+      scrypt(passwordBuffer, saltBuffer, this.SCRYPT_N, this.SCRYPT_R, this.SCRYPT_P, this.SCRYPT_DKLEN,
+        (error, progress, key) => {
+          if (error) {
+            reject(error);
+          } else if (key) {
+            resolve(btoa(cryptico.bytes2string(key)));
+          }
+        });
     });
   }
 
@@ -72,6 +74,7 @@ export class AuthenticationService {
   }
 
   masterKey(): string {
-    return localStorage.getItem('master_key');
+    return 'fixme';
+    // return this.crypto.deserializeRSAKey(localStorage.getItem('master_key'));
   }
 }
