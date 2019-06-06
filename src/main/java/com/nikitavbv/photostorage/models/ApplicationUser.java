@@ -8,17 +8,23 @@ public class ApplicationUser {
   private final int id;
   private final String passphraseHash;
   private final String passphraseSalt;
-  private final String masterKey;
+  private final String privateKey;
+  private final String privateKeySalt;
 
   public ApplicationUser(JsonObject jsonObject) {
     this.id = jsonObject.getInteger("id");
     this.passphraseHash = jsonObject.getString("password_hash");
     this.passphraseSalt = jsonObject.getString("password_salt");
-    this.masterKey = jsonObject.getString("private_key_enc");
+    this.privateKey = jsonObject.getString("private_key_enc");
+    this.privateKeySalt = jsonObject.getString("private_key_salt");
   }
 
-  public String masterKey() {
-    return masterKey;
+  public String privateKey() {
+    return privateKey;
+  }
+
+  public String privateKeySalt() {
+    return privateKeySalt;
   }
 
   public byte[] passphraseHashBytes() {

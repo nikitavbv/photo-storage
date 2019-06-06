@@ -20,45 +20,31 @@ export class AuthenticationService {
 
   constructor(private httpClient: HttpClient, private crypto: CryptoService) {}
 
-  signUp(username: string, password: string, publicKey: string, privateKeyEnc: string):
+  signUp(username: string, password: string, publicKey: string, privateKeyEnc: string, privateKeySalt):
     Observable<GenericApiResponse> {
     return this.httpClient.post<GenericApiResponse>('/api/v1/users', {
       username,
       password,
       public_key: publicKey,
-      private_key_enc: privateKeyEnc
+      private_key_enc: privateKeyEnc,
+      private_key_salt: privateKeySalt,
     });
   }
 
-  signIn(username: string, password: string): Observable<AuthenticationResponse> {
-    const resObservable = Observable.create();
-
-    this.hashPassword(password, username).then(hashedPassword => {
-      this.httpClient.post<AuthenticationResponse>('/api/v1/auth', {
-        username, password: hashedPassword
-      }).pipe(map((res: AuthenticationResponse) => {
-        const key = cryptico.generateRSAKey(password, this.RSA_BITS);
-        localStorage.setItem('access_token', res.access_token);
-        localStorage.setItem('master_key', cryptico.decrypt(res.master_key_enc, key).plaintext);
-        return res;
-      })).subscribe(resObservable);
-    });
-
-    return resObservable;
-  }
-
-  hashPassword(password: string, salt: string) {
+  signIn(username: string, password: string): Promise<AuthenticationResponse> {
     return new Promise((resolve, reject) => {
-      const passwordBuffer = new buffer.SlowBuffer(password.normalize('NFKC'));
-      const saltBuffer = new buffer.SlowBuffer(salt.normalize('NFKC'));
-      scrypt(passwordBuffer, saltBuffer, this.SCRYPT_N, this.SCRYPT_R, this.SCRYPT_P, this.SCRYPT_DKLEN,
-        (error, progress, key) => {
-          if (error) {
-            reject(error);
-          } else if (key) {
-            resolve(btoa(cryptico.bytes2string(key)));
-          }
-        });
+      this.httpClient.post<AuthenticationResponse>('/api/v1/auth', {
+        username, password
+      }).subscribe((res: AuthenticationResponse) => {
+        console.log({res});
+        this.crypto.deriveAESKey(password, res.private_key_salt).then((derivedKey: any) => {
+          console.log({derivedKey});
+          this.crypto.decryptPrivateRSAKeyWithAES(res.private_key_enc, derivedKey.key).then(decryptedPrivate => {
+            console.log({ decryptedPrivate });
+            resolve(res);
+          }, reject);
+        }, reject);
+      }, reject);
     });
   }
 

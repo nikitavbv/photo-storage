@@ -26,7 +26,7 @@ public class AuthVerticle extends ApiVerticle {
   public void start() {
     final EventBus eventBus = vertx.eventBus();
     eventBus.consumer(EventBusAddress.API_ADD_USER, addJsonConsumer(this::createUser, Arrays.asList(
-            "username", "password", "public_key", "private_key_enc"
+            "username", "password", "public_key", "private_key_enc", "private_key_salt"
     )));
     eventBus.consumer(EventBusAddress.API_AUTH, addJsonConsumer(this::authUser, Arrays.asList(
             "username", "password", "ip", "user_agent"
@@ -48,6 +48,7 @@ public class AuthVerticle extends ApiVerticle {
       userObject.put("password_hash", hashedPassword.result().body());
       userObject.put("public_key", req.getValue("public_key"));
       userObject.put("private_key_enc", req.getValue("private_key_enc"));
+      userObject.put("private_key_salt", req.getValue("private_key_salt"));
 
       JsonObject insertOp = new JsonObject().put("table", "users").put("data", userObject);
       vertx.eventBus().send(EventBusAddress.DATABASE_INSERT, insertOp, res ->
@@ -68,6 +69,7 @@ public class AuthVerticle extends ApiVerticle {
                     .add("password_salt")
                     .add("password_hash")
                     .add("private_key_enc")
+                    .add("private_key_salt")
             )
             .put("limit", 1);
     vertx.eventBus().send(EventBusAddress.DATABASE_GET, getOp, res -> {
@@ -94,7 +96,8 @@ public class AuthVerticle extends ApiVerticle {
                   .setHandler(startSessionResult -> result.complete(new JsonObject()
                           .put("status", "ok")
                           .put("access_token", startSessionResult.result())
-                          .put("master_key_enc", user.masterKey())
+                          .put("private_key_enc", user.privateKey())
+                          .put("private_key_salt", user.privateKeySalt())
                   ));
         }
       });

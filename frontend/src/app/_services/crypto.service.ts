@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import {resolveComponentResources} from "@angular/core/src/metadata/resource_loading";
 
 @Injectable()
 export class CryptoService {
@@ -129,10 +130,39 @@ export class CryptoService {
     });
   }
 
-  exportRSAPublicKey(publicRSAKey: CryptoKey) {
-    return new Promise(resolve => {
-      // TODO: finish this
+  decryptPrivateRSAKeyWithAES(encrypted: string, aesKey: CryptoKey) {
+    const spl = encrypted.split(':');
+    const iv = CryptoService.stringToUInt8Array(spl[0]);
+    const encryptedBytes = CryptoService.stringToArrayBuffer(encrypted);
+
+    return new Promise((resolve, reject) => {
+      window.crypto.subtle.decrypt(
+        {
+          name: 'AES-GCM',
+          iv,
+          tagLength: this.AES_TAG_LENGTH
+        },
+        aesKey,
+        encryptedBytes
+      ).then(decryptedBytes => {
+        window.crypto.subtle.importKey(
+          'pkcs8',
+          decryptedBytes,
+          {
+            name: 'RSA-OAEP',
+            hash: {name: this.RSA_HASH},
+          },
+          false,
+          ['decrypt']
+        ).then(key => resolve(key), reject);
+      }, reject);
     });
+  }
+
+  exportRSAPublicKey(publicRSAKey: CryptoKey) {
+    return new Promise(resolve => window.crypto.subtle.exportKey('spki', publicRSAKey)
+      .then(keyData => resolve(CryptoService.arrayBufferToString(keyData)))
+    );
   }
 
   static uInt8ArrayToString(arr: Uint8Array): string {
@@ -153,7 +183,11 @@ export class CryptoService {
     return result;
   }
 
-  static arrayBufferToString(buffer) {
+  static arrayBufferToString(buffer: ArrayBuffer): string {
     return CryptoService.uInt8ArrayToString(new Uint8Array(buffer));
+  }
+
+  static stringToArrayBuffer(str: string): ArrayBuffer {
+    return this.stringToUInt8Array(str).buffer;
   }
 }
