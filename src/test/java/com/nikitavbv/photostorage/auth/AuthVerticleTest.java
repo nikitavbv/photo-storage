@@ -54,6 +54,7 @@ public class AuthVerticleTest {
     req.put("password", "testpassword");
     req.put("public_key", "01234567890123456");
     req.put("private_key_enc", "01234567890123456");
+    req.put("private_key_salt", "123456");
     vertx.eventBus().consumer(EventBusAddress.DATABASE_INSERT, obj -> {
       JsonObject objToInsert = ((JsonObject) obj.body());
       JsonObject data = objToInsert.getJsonObject("data");
@@ -62,6 +63,7 @@ public class AuthVerticleTest {
       context.assertEquals("01234567890123456", data.getString("public_key"));
       context.assertTrue(data.containsKey("password_salt"));
       context.assertTrue(data.containsKey("password_hash"));
+      context.assertTrue(data.containsKey("private_key_salt"));
       obj.reply(new JsonObject().put("status", "ok"));
       dbAsync.complete();
     });
