@@ -1,5 +1,4 @@
 import {Injectable} from '@angular/core';
-import {resolveComponentResources} from "@angular/core/src/metadata/resource_loading";
 
 @Injectable()
 export class CryptoService {
@@ -115,7 +114,9 @@ export class CryptoService {
         'pkcs8',
         privateRSAKey
       ).then(keyData => {
+        console.log('keyData is', keyData[0], keyData[1], keyData[3], keyData[4]);
         const iv: Uint8Array = window.crypto.getRandomValues(new Uint8Array(this.AES_IV_LENGTH));
+        console.log('iv is', iv);
         window.crypto.subtle.encrypt(
           {
           name: 'AES-GCM',
@@ -133,7 +134,9 @@ export class CryptoService {
   decryptPrivateRSAKeyWithAES(encrypted: string, aesKey: CryptoKey) {
     const spl = encrypted.split(':');
     const iv = CryptoService.stringToUInt8Array(spl[0]);
-    const encryptedBytes = CryptoService.stringToArrayBuffer(encrypted);
+    const encryptedBytes = CryptoService.stringToUInt8Array(spl[1]);
+
+    console.log(encryptedBytes);
 
     return new Promise((resolve, reject) => {
       window.crypto.subtle.decrypt(
@@ -145,6 +148,8 @@ export class CryptoService {
         aesKey,
         encryptedBytes
       ).then(decryptedBytes => {
+        console.log('decrypted private key:', decryptedBytes);
+
         window.crypto.subtle.importKey(
           'pkcs8',
           decryptedBytes,
@@ -154,8 +159,10 @@ export class CryptoService {
           },
           false,
           ['decrypt']
-        ).then(key => resolve(key), reject);
-      }, reject);
+        ).then(key => {
+          resolve(key);
+        }, console.error.bind(this, 'fail 2'));
+      }, console.error.bind(this, 'fail 1'));
     });
   }
 
@@ -163,6 +170,14 @@ export class CryptoService {
     return new Promise(resolve => window.crypto.subtle.exportKey('spki', publicRSAKey)
       .then(keyData => resolve(CryptoService.arrayBufferToString(keyData)))
     );
+  }
+
+  static uInt8ArrayToArrayBuffer(arr: Uint8Array): ArrayBuffer {
+    const buffer = new ArrayBuffer(arr.length);
+    for (let i = 0; i < arr.length; i++) {
+      buffer[i] = arr[i];
+    }
+    return buffer;
   }
 
   static uInt8ArrayToString(arr: Uint8Array): string {
@@ -188,6 +203,6 @@ export class CryptoService {
   }
 
   static stringToArrayBuffer(str: string): ArrayBuffer {
-    return this.stringToUInt8Array(str).buffer;
+    return this.uInt8ArrayToArrayBuffer(this.stringToUInt8Array(str));
   }
 }
