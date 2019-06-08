@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import {CryptoKeyAndSalt} from "../_models/crypto-key-and-salt";
 
 @Injectable()
 export class CryptoService {
@@ -36,14 +37,27 @@ export class CryptoService {
     });
   }
 
-  rsaEncrypt(publicKey: any, dataToEncrypt: any, callback: (encryptedData: string) => void) {
-    const id = CryptoService.randomId();
-    this.callbacks.set(id, callback);
-    this.worker.postMessage({
-      publicKey,
-      dataToEncrypt,
-      action: 'encrypt_with_rsa_public_key',
-      id
+  rsaEncrypt(publicKey: CryptoKey, dataToEncrypt: Uint8Array): Promise<Uint8Array> {
+    return new Promise<Uint8Array>(resolve => {
+      window.crypto.subtle.encrypt(
+        {
+          name: 'RSA-OAEP'
+        },
+        publicKey,
+        dataToEncrypt
+      ).then(data => resolve(new Uint8Array(data)));
+    });
+  }
+
+  rsaDecrypt(privateKey: CryptoKey, dataToDecrypt: Uint8Array): Promise<Uint8Array> {
+    return new Promise<Uint8Array>(resolve => {
+      window.crypto.subtle.decrypt(
+        {
+          name: 'RSA-OAEP'
+        },
+        privateKey,
+        dataToDecrypt
+      ).then(data => resolve(new Uint8Array(data)));
     });
   }
 
@@ -75,7 +89,7 @@ export class CryptoService {
     );
   }
 
-  deriveAESKey(password: string, salt: string = undefined) {
+  deriveAESKey(password: string, salt: string = undefined): Promise<CryptoKeyAndSalt> {
     const encodedPassword = new TextEncoder().encode(password);
     salt = salt || CryptoService.uInt8ArrayToString(
       window.crypto.getRandomValues(new Uint8Array(this.PBKDF2_SALT_LENGTH))
@@ -103,20 +117,18 @@ export class CryptoService {
           },
           false,
           ['encrypt', 'decrypt']
-        ).then((key) => resolve({key, salt}));
+        ).then((key) => resolve(new CryptoKeyAndSalt(key, salt)));
       });
     });
   }
 
-  encryptPrivateRSAKeyWithAES(privateRSAKey: CryptoKey, aesKey: CryptoKey) {
+  encryptPrivateRSAKeyWithAES(privateRSAKey: CryptoKey, aesKey: CryptoKey): Promise<string> {
     return new Promise(resolve => {
       window.crypto.subtle.exportKey(
         'pkcs8',
         privateRSAKey
       ).then(keyData => {
-        console.log('keyData is', keyData[0], keyData[1], keyData[3], keyData[4]);
         const iv: Uint8Array = window.crypto.getRandomValues(new Uint8Array(this.AES_IV_LENGTH));
-        console.log('iv is', iv);
         window.crypto.subtle.encrypt(
           {
           name: 'AES-GCM',
@@ -131,14 +143,12 @@ export class CryptoService {
     });
   }
 
-  decryptPrivateRSAKeyWithAES(encrypted: string, aesKey: CryptoKey) {
+  decryptPrivateRSAKeyWithAES(encrypted: string, aesKey: CryptoKey): Promise<CryptoKey> {
     const spl = encrypted.split(':');
     const iv = CryptoService.stringToUInt8Array(spl[0]);
     const encryptedBytes = CryptoService.stringToUInt8Array(spl[1]);
 
-    console.log(encryptedBytes);
-
-    return new Promise((resolve, reject) => {
+    return new Promise<CryptoKey>((resolve, reject) => {
       window.crypto.subtle.decrypt(
         {
           name: 'AES-GCM',
@@ -148,8 +158,6 @@ export class CryptoService {
         aesKey,
         encryptedBytes
       ).then(decryptedBytes => {
-        console.log('decrypted private key:', decryptedBytes);
-
         window.crypto.subtle.importKey(
           'pkcs8',
           decryptedBytes,
@@ -191,7 +199,7 @@ export class CryptoService {
 
   static stringToUInt8Array(str: string): Uint8Array {
     const binary = atob(str);
-    const result = new Uint8Array(str.length);
+    const result = new Uint8Array(binary.length);
     for (let i = 0; i < result.length; i++) {
       result[i] = binary.charCodeAt(i);
     }
