@@ -83,8 +83,8 @@ public class PhotoUploadTest {
 
     JsonObject photoUploadRequest = new JsonObject();
     photoUploadRequest.put("access_token", "fcrJKhGoGnjOyOKZ25up0A==");
-    photoUploadRequest.put("photo_data_enc", Base64.getEncoder().encodeToString(encryptedPhoto));
-    photoUploadRequest.put("photo_data_iv", Base64.getEncoder().encodeToString(iv));
+    photoUploadRequest.put("photo_data_enc", Base64.getEncoder().encodeToString(iv) + ":" +
+            Base64.getEncoder().encodeToString(encryptedPhoto));
     photoUploadRequest.put("key_enc", Base64.getEncoder().encodeToString(encryptedImageKey));
 
     vertx.eventBus().consumer(EventBusAddress.DATABASE_GET, getReq -> {

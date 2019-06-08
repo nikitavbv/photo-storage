@@ -2,21 +2,10 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {AuthenticationResponse, GenericApiResponse} from "../_models";
-import {map} from "rxjs/operators";
 import {CryptoService} from "./crypto.service";
-
-declare const cryptico: any;
-declare const scrypt: any;
-declare const buffer: any;
 
 @Injectable()
 export class AuthenticationService {
-
-  readonly RSA_BITS = 1024;
-  readonly SCRYPT_N = 1024;
-  readonly SCRYPT_R = 8;
-  readonly SCRYPT_P = 1;
-  readonly SCRYPT_DKLEN = 32;
 
   constructor(private httpClient: HttpClient, private crypto: CryptoService) {}
 
@@ -54,6 +43,10 @@ export class AuthenticationService {
     localStorage.removeItem('access_token');
     localStorage.removeItem('public_key');
     localStorage.removeItem('private_key');
+  }
+
+  publicKey(): Promise<CryptoKey> {
+    return this.crypto.importRSAPublicKey(localStorage.getItem('public_key'));
   }
 
   // noinspection JSMethodCanBeStatic

@@ -22,4 +22,12 @@ describe('CryptoService', () => {
     expect(dummyDecryptedText).toBe('dummy data');
     done();
   });
+
+  it('should import and export public key', async (done: DoneFn) => {
+    const randomRSAKey: CryptoKeyPair = await service.randomRSAKey();
+    const exportedKey: string = await service.exportRSAPublicKey(randomRSAKey.publicKey);
+    const importedKey: CryptoKey = await service.importRSAPublicKey(exportedKey);
+    expect(importedKey).not.toBe(undefined);
+    done();
+  });
 });

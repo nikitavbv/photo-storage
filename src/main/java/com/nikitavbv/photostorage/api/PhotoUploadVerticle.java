@@ -8,6 +8,7 @@ import com.nikitavbv.photostorage.storage.GoogleCloudStorageVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ public class PhotoUploadVerticle extends ApiVerticle {
 
   public void start() {
     vertx.eventBus().consumer(EventBusAddress.API_PHOTO_UPLOAD, addJsonConsumer(this::uploadPhoto, Arrays.asList(
-        "access_token", "photo_data_enc", "photo_data_iv", "key_enc"
+        "access_token", "photo_data_enc", "key_enc"
     )));
     ConfigRetriever.create(vertx).getConfig(ar -> {
       JsonObject config = ar.result();
@@ -45,7 +46,6 @@ public class PhotoUploadVerticle extends ApiVerticle {
       String storageDriver = getPreferredStorageDriver(user);
       String photoID = UUID.randomUUID().toString();
       long uploadTimestamp = System.currentTimeMillis();
-      String photoIV = uploadPhotoRequest.getString("photo_data_iv");
       String keyEnc = uploadPhotoRequest.getString("key_enc");
 
       JsonObject driverReq = new JsonObject()
@@ -57,7 +57,6 @@ public class PhotoUploadVerticle extends ApiVerticle {
           JsonObject photoObject = new JsonObject()
                   .put("storage_driver", storageDriver)
                   .put("storage_key", storageKey)
-                  .put("photo_data_iv", photoIV)
                   .put("id", photoID)
                   .put("upload_timestamp", uploadTimestamp);
           JsonObject insertOp = new JsonObject().put("table", "photos").put("data", photoObject);

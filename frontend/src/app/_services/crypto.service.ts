@@ -27,6 +27,23 @@ export class CryptoService {
     };
   }
 
+  aesEncrypt(dataToEncrypt: Uint8Array, key: CryptoKey): Promise<string> {
+    return new Promise<string>(resolve => {
+      const iv: Uint8Array = window.crypto.getRandomValues(new Uint8Array(this.AES_IV_LENGTH));
+      window.crypto.subtle.encrypt(
+        {
+          name: 'AES-GCM',
+          iv,
+          tagLength: this.AES_TAG_LENGTH
+        },
+        key,
+        dataToEncrypt
+      ).then(encrypted => resolve(CryptoService.uInt8ArrayToString(
+          CryptoService.ivAndDataToArray(iv, new Uint8Array(encrypted))
+      )))
+    });
+  }
+
   rsaEncrypt(publicKey: CryptoKey, dataToEncrypt: Uint8Array): Promise<Uint8Array> {
     return new Promise<Uint8Array>(resolve => {
       window.crypto.subtle.encrypt(
@@ -66,6 +83,19 @@ export class CryptoService {
     });
   }
 
+  randomAESKey(): Promise<CryptoKey> {
+    return new Promise((resolve, reject) => {
+      window.crypto.subtle.generateKey(
+        {
+          name: 'AES-GCM',
+          length: 256,
+        },
+        true,
+        ['encrypt']
+      ).then(resolve, reject);
+    });
+  }
+
   deriveAESKey(password: string, salt: string = undefined): Promise<CryptoKeyAndSalt> {
     const encodedPassword = new TextEncoder().encode(password);
     salt = salt || CryptoService.uInt8ArrayToString(
@@ -100,30 +130,34 @@ export class CryptoService {
   }
 
   encryptPrivateRSAKeyWithAES(privateRSAKey: CryptoKey, aesKey: CryptoKey): Promise<string> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       window.crypto.subtle.exportKey(
         'pkcs8',
         privateRSAKey
-      ).then(keyData => {
-        const iv: Uint8Array = window.crypto.getRandomValues(new Uint8Array(this.AES_IV_LENGTH));
-        window.crypto.subtle.encrypt(
-          {
-          name: 'AES-GCM',
-          iv,
-          tagLength: this.AES_TAG_LENGTH
-          },
-          aesKey,
-          keyData
-        ).then(encrypted => resolve(CryptoService.uInt8ArrayToString(iv) + ':' +
-            CryptoService.arrayBufferToString(encrypted)))
+      ).then(keyData => this.aesEncrypt(new Uint8Array(keyData), aesKey).then(resolve, reject));
+    });
+  }
+
+  encryptAESKeyWithPublicRSA(aesKey: CryptoKey, publicRSAKey: CryptoKey): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      window.crypto.subtle.exportKey('raw', aesKey).then(keyData => {
+        this.rsaEncrypt(publicRSAKey, new Uint8Array(keyData)).then(data => {
+          resolve(CryptoService.uInt8ArrayToString(data))
+        }, reject);
       });
     });
   }
 
   decryptPrivateRSAKeyWithAES(encrypted: string, aesKey: CryptoKey): Promise<CryptoKey> {
-    const spl = encrypted.split(':');
-    const iv = CryptoService.stringToUInt8Array(spl[0]);
-    const encryptedBytes = CryptoService.stringToUInt8Array(spl[1]);
+    const bytes = CryptoService.stringToUInt8Array(encrypted);
+    const iv = new Uint8Array(bytes[0]);
+    const encryptedBytes = new Uint8Array(bytes.length - iv.length - 1);
+    for (let i = 0; i < iv.length; i++) {
+      iv[i] = bytes[i + 1];
+    }
+    for (let i = 0; i < encryptedBytes.length; i++) {
+      encryptedBytes[i] = bytes[i + 1 + iv.length];
+    }
 
     return new Promise<CryptoKey>((resolve, reject) => {
       window.crypto.subtle.decrypt(
@@ -157,17 +191,24 @@ export class CryptoService {
     );
   }
 
+  importRSAPublicKey(publicKeyString: string): Promise<CryptoKey> {
+    return new Promise((resolve, reject) => {
+      crypto.subtle.importKey(
+        'spki',
+        CryptoService.stringToUInt8Array(publicKeyString),
+        {
+          name: 'RSA-OAEP',
+          hash: { name: this.RSA_HASH }
+        },
+        false,
+        ['encrypt']
+      ).then(resolve, reject);
+    });
+  }
+
   exportRSAPrivateKey(privateRSAKey: CryptoKey): Promise<string> {
     return new Promise<string>(resolve => crypto.subtle.exportKey('pkcs8', privateRSAKey)
       .then(keyData => resolve(CryptoService.arrayBufferToString(keyData))));
-  }
-
-  static uInt8ArrayToArrayBuffer(arr: Uint8Array): ArrayBuffer {
-    const buffer = new ArrayBuffer(arr.length);
-    for (let i = 0; i < arr.length; i++) {
-      buffer[i] = arr[i];
-    }
-    return buffer;
   }
 
   static uInt8ArrayToString(arr: Uint8Array): string {
@@ -192,7 +233,15 @@ export class CryptoService {
     return CryptoService.uInt8ArrayToString(new Uint8Array(buffer));
   }
 
-  static stringToArrayBuffer(str: string): ArrayBuffer {
-    return this.uInt8ArrayToArrayBuffer(this.stringToUInt8Array(str));
+  static ivAndDataToArray(iv: Uint8Array, data: Uint8Array): Uint8Array {
+    const result: Uint8Array = new Uint8Array(iv.length + data.length + 1);
+    result[0] = iv.length;
+    for (let i = 0; i < iv.length; i++) {
+      result[i + 1] = iv[i];
+    }
+    for (let i = 0; i < data.length; i++) {
+      result[i + iv.length + 1] = data[i];
+    }
+    return result;
   }
 }
