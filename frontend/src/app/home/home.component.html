@@ -14,7 +14,10 @@
 
 <div class="gallery">
   <div class="gallery-block">
-    <div class="block-label">Today</div>
+    <!--<div class="block-label">Just now</div>-->
+    <photo *ngFor="let photo of photos" class="photo" [photo]="photo"></photo>
+  </div>
+    <!--<div class="block-label">Today</div>
     <div class="block-photos">
       <div class="photo" style="background-image: url('http://lorempixel.com/640/481')"></div>
       <div class="photo" style="background-image: url('http://lorempixel.com/640/480')"></div>
@@ -75,7 +78,7 @@
       <div class="photo" style="background-image: url('http://lorempixel.com/640/471')"></div>
       <div class="photo" style="background-image: url('http://lorempixel.com/640/475')"></div>
     </div>
-  </div>
+  </div>-->
 </div>
 
 <div *ngIf="photoDragInProgress" class="drop-prompt">

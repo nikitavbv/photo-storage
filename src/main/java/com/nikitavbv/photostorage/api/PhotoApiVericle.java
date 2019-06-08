@@ -18,8 +18,6 @@ public class PhotoApiVericle extends ApiVerticle {
   private Future<JsonObject> getUserPhotos(JsonObject req) {
     Future<JsonObject> future = Future.future();
 
-    System.out.println("here");
-
     getUserBySessionToken(req.getString("access_token")).setHandler(userReply -> {
       ApplicationUser user = userReply.result();
 
@@ -28,13 +26,18 @@ public class PhotoApiVericle extends ApiVerticle {
       JsonObject keysSelectOp = new JsonObject()
               .put("table", "keys")
               .put("query", keysQuery)
-              .put("select_fields", new JsonArray().add("photo_id"));
+              .put("select_fields", new JsonArray().add("photo_id").add("key_enc"));
       vertx.eventBus().send(EventBusAddress.DATABASE_GET, keysSelectOp, photoInfoRes -> {
         JsonArray keysRows = ((JsonObject) photoInfoRes.result().body()).getJsonArray("rows");
 
         JsonArray resultArr = new JsonArray();
         for (int i = 0; i < keysRows.size(); i++) {
-          resultArr.add(new JsonObject().put("id", keysRows.getJsonObject(i).getString("photo_id")));
+          JsonObject row = keysRows.getJsonObject(i);
+          resultArr.add(
+                  new JsonObject()
+                  .put("id", row.getString("photo_id"))
+                  .put("key_enc", row.getString("key_enc"))
+          );
         }
 
         future.complete(new JsonObject().put("status", "ok").put("photos", resultArr));
