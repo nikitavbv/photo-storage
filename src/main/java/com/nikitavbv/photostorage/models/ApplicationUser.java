@@ -6,6 +6,7 @@ import java.util.Base64;
 public class ApplicationUser {
 
   private final int id;
+  private final String publicKey;
   private final String passphraseHash;
   private final String passphraseSalt;
   private final String privateKey;
@@ -15,8 +16,13 @@ public class ApplicationUser {
     this.id = jsonObject.getInteger("id");
     this.passphraseHash = jsonObject.getString("password_hash");
     this.passphraseSalt = jsonObject.getString("password_salt");
+    this.publicKey = jsonObject.getString("public_key");
     this.privateKey = jsonObject.getString("private_key_enc");
     this.privateKeySalt = jsonObject.getString("private_key_salt");
+  }
+
+  public String publicKey() {
+    return publicKey;
   }
 
   public String privateKey() {

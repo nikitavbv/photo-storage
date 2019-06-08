@@ -2,21 +2,10 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {AuthenticationResponse, GenericApiResponse} from "../_models";
-import {map} from "rxjs/operators";
 import {CryptoService} from "./crypto.service";
-
-declare const cryptico: any;
-declare const scrypt: any;
-declare const buffer: any;
 
 @Injectable()
 export class AuthenticationService {
-
-  readonly RSA_BITS = 1024;
-  readonly SCRYPT_N = 1024;
-  readonly SCRYPT_R = 8;
-  readonly SCRYPT_P = 1;
-  readonly SCRYPT_DKLEN = 32;
 
   constructor(private httpClient: HttpClient, private crypto: CryptoService) {}
 
@@ -36,12 +25,14 @@ export class AuthenticationService {
       this.httpClient.post<AuthenticationResponse>('/api/v1/auth', {
         username, password
       }).subscribe((res: AuthenticationResponse) => {
-        console.log({res});
         this.crypto.deriveAESKey(password, res.private_key_salt).then((derivedKey: any) => {
-          console.log({derivedKey});
           this.crypto.decryptPrivateRSAKeyWithAES(res.private_key_enc, derivedKey.key).then(decryptedPrivate => {
-            console.log({ decryptedPrivate });
-            resolve(res);
+            this.crypto.exportRSAPrivateKey(decryptedPrivate).then(exportedKey => {
+              localStorage.setItem('access_token', res.access_token);
+              localStorage.setItem('public_key', res.public_key);
+              localStorage.setItem('private_key', exportedKey);
+              resolve(res);
+            }, reject);
           }, reject);
         }, reject);
       }, reject);
@@ -50,17 +41,16 @@ export class AuthenticationService {
 
   logout(): void {
     localStorage.removeItem('access_token');
-    localStorage.removeItem('rsa_key');
-    localStorage.removeItem('master_key');
+    localStorage.removeItem('public_key');
+    localStorage.removeItem('private_key');
+  }
+
+  publicKey(): Promise<CryptoKey> {
+    return this.crypto.importRSAPublicKey(localStorage.getItem('public_key'));
   }
 
   // noinspection JSMethodCanBeStatic
   isLoggedIn(): boolean {
     return localStorage && localStorage.getItem('access_token') != undefined;
-  }
-
-  masterKey(): string {
-    return 'fixme';
-    // return this.crypto.deserializeRSAKey(localStorage.getItem('master_key'));
   }
 }

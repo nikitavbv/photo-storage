@@ -10,11 +10,11 @@ export class JwtInterceptor implements HttpInterceptor {
     constructor(private router: Router) {}
 
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}') || {};
-        if (currentUser && currentUser.token) {
+        const accessToken = localStorage.getItem('access_token');
+        if (accessToken) {
             request = request.clone({
                setHeaders: {
-                   Authorization: `Bearer ${currentUser.token}`
+                   Authorization: `Bearer ${accessToken}`
                }
             });
         }
@@ -24,8 +24,10 @@ export class JwtInterceptor implements HttpInterceptor {
                 const authHeaderValue = data.headers.get('authorization');
                 if (authHeaderValue) {
                     if (authHeaderValue.startsWith('Bearer ')) {
-                        currentUser.token = authHeaderValue.substring(authHeaderValue.indexOf('Bearer ') + 'Bearer '.length);
-                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        const newAccessToken = authHeaderValue.substring(
+                          authHeaderValue.indexOf('Bearer ') + 'Bearer '.length
+                        );
+                        localStorage.setItem('access_token', newAccessToken);
                     } else {
                         console.error('Unknown auth token type:', authHeaderValue);
                     }

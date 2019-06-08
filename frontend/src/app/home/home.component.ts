@@ -51,26 +51,46 @@ export class HomeComponent {
   }
 
   startFileUpload(file: any): void {
-    const fileReader = new FileReader();
     this.totalFilesInUpload++;
-    if (this.totalFilesInUpload == 1) {
+    this.updateUploadNotif();
+    console.log('started');
+
+    Promise.all<Uint8Array, CryptoKey, CryptoKey>([
+      this.readFileAsDataUrl(file),
+      this.crypto.randomAESKey(),
+      this.auth.publicKey()
+    ]).then(([data, photoEncKey, publicKey]) => {
+      return Promise.all<string, string>([
+        this.crypto.aesEncrypt(data, photoEncKey),
+        this.crypto.encryptAESKeyWithPublicRSA(photoEncKey, publicKey)
+      ])
+    }).then(([encryptedData, encryptedRsaKey]) => {
+      this.photoService.upload(encryptedData, encryptedRsaKey).subscribe((res) => {
+        console.log(res);
+        this.totalFilesInUpload--;
+        this.updateUploadNotif();
+      }, console.error);
+    });
+  }
+
+  updateUploadNotif() {
+    if (this.totalFilesInUpload == 0) {
+      this.header.notif(`All photos are uploaded`);
+    } else if (this.totalFilesInUpload == 1) {
       this.header.notif(`Uploading ${this.totalFilesInUpload} photo...`);
     } else {
       this.header.notif(`Uploading ${this.totalFilesInUpload} photos...`);
     }
-    console.log('started');
-    fileReader.onload = (e) => {
-      console.log('loaded');
-      this.crypto.generateKeyAndEncrypt((e.target as any).result, (key, encryptedData) => {
-        console.log('data encrypted');
-        this.crypto.rsaEncrypt(cryptico.publicKeyString(this.auth.masterKey()), key, (encryptedKey) => {
-          console.log('all done');
-          console.log({ encryptedKey });
-          console.log({ encryptedData });
-        });
-      });
-    };
-    fileReader.readAsDataURL(file);
+  }
+
+  readFileAsDataUrl(file: Blob): Promise<Uint8Array> {
+    return new Promise<Uint8Array>(resolve => {
+      const fileReader = new FileReader();
+      fileReader.onload = e => {
+        resolve(new TextEncoder().encode((e.target as any).result.toString()));
+      };
+      fileReader.readAsDataURL(file);
+    });
   }
 }
 
