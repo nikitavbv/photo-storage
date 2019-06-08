@@ -61,14 +61,14 @@ export class HomeComponent {
     console.log('started');
     fileReader.onload = (e) => {
       console.log('loaded');
-      this.crypto.generateKeyAndEncrypt((e.target as any).result, (key, encryptedData) => {
+      /*this.crypto.generateKeyAndEncrypt((e.target as any).result, (key, encryptedData) => {
         console.log('data encrypted');
         this.crypto.rsaEncrypt(cryptico.publicKeyString(this.auth.masterKey()), key, (encryptedKey) => {
           console.log('all done');
           console.log({ encryptedKey });
           console.log({ encryptedData });
         });
-      });
+      });*/
     };
     fileReader.readAsDataURL(file);
   }

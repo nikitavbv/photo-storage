@@ -27,16 +27,6 @@ export class CryptoService {
     };
   }
 
-  generateKeyAndEncrypt(dataToEncrypt: any, callback: (key: number[], encryptedData: string) => void) {
-    const id = CryptoService.randomId();
-    this.callbacks.set(id, callback);
-    this.worker.postMessage({
-      dataToEncrypt,
-      action: 'generate_key_and_encrypt',
-      id
-    });
-  }
-
   rsaEncrypt(publicKey: CryptoKey, dataToEncrypt: Uint8Array): Promise<Uint8Array> {
     return new Promise<Uint8Array>(resolve => {
       window.crypto.subtle.encrypt(
@@ -61,32 +51,19 @@ export class CryptoService {
     });
   }
 
-  aesEncrypt(key: any, dataToEncrypt: any, callback: (encryptedData: string) => void) {
-    const id = CryptoService.randomId();
-    this.callbacks.set(id, callback);
-    this.worker.postMessage({
-      key,
-      dataToEncrypt,
-      action: 'aes_encrypt',
-      id
+  randomRSAKey(): Promise<CryptoKeyPair> {
+    return new Promise(resolve => {
+      window.crypto.subtle.generateKey(
+        {
+          name: 'RSA-OAEP',
+          modulusLength: this.RSA_KEY_LENGTH,
+          publicExponent: this.RSA_PUBLIC_EXPONENT,
+          hash: { name: this.RSA_HASH },
+        },
+        true,
+        ['encrypt', 'decrypt']
+      ).then(data => resolve(data));
     });
-  }
-
-  static randomId(): string {
-    return Math.random().toString(36);
-  }
-
-  randomRSAKey(): any {
-    return window.crypto.subtle.generateKey(
-      {
-        name: 'RSA-OAEP',
-        modulusLength: this.RSA_KEY_LENGTH,
-        publicExponent: this.RSA_PUBLIC_EXPONENT,
-        hash: { name: this.RSA_HASH },
-      },
-      true,
-      ['encrypt', 'decrypt']
-    );
   }
 
   deriveAESKey(password: string, salt: string = undefined): Promise<CryptoKeyAndSalt> {
@@ -165,19 +142,24 @@ export class CryptoService {
             name: 'RSA-OAEP',
             hash: {name: this.RSA_HASH},
           },
-          false,
+          true,
           ['decrypt']
         ).then(key => {
           resolve(key);
-        }, console.error.bind(this, 'fail 2'));
-      }, console.error.bind(this, 'fail 1'));
+        }, reject);
+      }, reject);
     });
   }
 
-  exportRSAPublicKey(publicRSAKey: CryptoKey) {
+  exportRSAPublicKey(publicRSAKey: CryptoKey): Promise<string> {
     return new Promise(resolve => window.crypto.subtle.exportKey('spki', publicRSAKey)
       .then(keyData => resolve(CryptoService.arrayBufferToString(keyData)))
     );
+  }
+
+  exportRSAPrivateKey(privateRSAKey: CryptoKey): Promise<string> {
+    return new Promise<string>(resolve => crypto.subtle.exportKey('pkcs8', privateRSAKey)
+      .then(keyData => resolve(CryptoService.arrayBufferToString(keyData))));
   }
 
   static uInt8ArrayToArrayBuffer(arr: Uint8Array): ArrayBuffer {

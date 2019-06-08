@@ -14,7 +14,7 @@ export class SignInComponent {
   constructor(private auth: AuthenticationService) {}
 
   signIn(username: string, password: string) {
-    this.auth.signIn(username, password).then(console.log);
+    this.auth.signIn(username, password).then(() => {});
   }
 
 }

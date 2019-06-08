@@ -68,6 +68,7 @@ public class AuthVerticle extends ApiVerticle {
                     .add("id")
                     .add("password_salt")
                     .add("password_hash")
+                    .add("public_key")
                     .add("private_key_enc")
                     .add("private_key_salt")
             )
@@ -96,6 +97,7 @@ public class AuthVerticle extends ApiVerticle {
                   .setHandler(startSessionResult -> result.complete(new JsonObject()
                           .put("status", "ok")
                           .put("access_token", startSessionResult.result())
+                          .put("public_key", user.publicKey())
                           .put("private_key_enc", user.privateKey())
                           .put("private_key_salt", user.privateKeySalt())
                   ));
