@@ -33,9 +33,12 @@ export class HomeComponent {
     event.preventDefault();
     event.stopPropagation();
     this.photoDragInProgress = false;
+    this.uploadFiles(event.dataTransfer.files);
+  }
 
-    for (let i = 0; i < event.dataTransfer.files.length; i++) {
-      this.startFileUpload(event.dataTransfer.files[i]);
+  uploadFiles(files): void {
+    for (let i = 0; i < files.length; i++) {
+      this.startFileUpload(files[i]);
     }
   }
 
@@ -53,7 +56,6 @@ export class HomeComponent {
   startFileUpload(file: any): void {
     this.totalFilesInUpload++;
     this.updateUploadNotif();
-    console.log('started');
 
     Promise.all<Uint8Array, CryptoKey, CryptoKey>([
       this.readFileAsDataUrl(file),
