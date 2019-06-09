@@ -99,4 +99,13 @@ export class Photo {
     this.tags.push(tag);
     this.saveMetaUpdates();
   }
+
+  download() {
+    const link = document.createElement("a");
+    link.download = this.id;
+    link.href = this.data;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 }
