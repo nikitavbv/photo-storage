@@ -11,8 +11,13 @@ export class PhotoModalComponent {
   @Input() photo: Photo;
   @Output() closeModal: EventEmitter<void> = new EventEmitter();
 
+  photoChanged = false;
+
   @HostListener('document:keydown.escape', ['$event'])
   onKeydownHandler() {
+    if (this.photoChanged) {
+      this.photo.saveMetaUpdates();
+    }
     this.closeModal.emit();
   }
 }

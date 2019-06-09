@@ -2,7 +2,7 @@
   <img class="photo" [ngClass]="{'photo-v': photo.height > photo.width, 'photo-h': !(photo.height > photo.width)}" src="{{photo.data}}"  alt="photo"/>
 </div>
 <div class="side-menu">
-  <input placeholder="Description..." />
+  <input [(ngModel)]="photo.description" (ngModelChange)="this.photoChanged = true" placeholder="Description..." />
   <input placeholder="Location..." />
   <span class="uploaded-on">Uploaded on 2019-01-01 01:02:03</span>
   <span class="section-name">tags:</span>

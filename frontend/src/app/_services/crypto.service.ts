@@ -180,7 +180,7 @@ export class CryptoService {
           keyData,
           'AES-GCM',
           false,
-          ['decrypt']
+          ['decrypt', 'encrypt']
         ).then(key => resolve(key), reject);
       });
     });

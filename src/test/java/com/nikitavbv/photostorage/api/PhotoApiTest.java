@@ -21,7 +21,7 @@ public class PhotoApiTest {
   @Before
   public void deployVerticle(TestContext context) {
     vertx = Vertx.vertx();
-    vertx.deployVerticle(PhotoApiVericle.class.getName(), context.asyncAssertSuccess());
+    vertx.deployVerticle(PhotoApiVerticle.class.getName(), context.asyncAssertSuccess());
     vertx.deployVerticle(CryptoVerticle.class.getName(), context.asyncAssertSuccess());
   }
 

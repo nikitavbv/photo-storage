@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@SuppressWarnings("Duplicates")
 public class PostgreSQLVerticle extends AbstractVerticle {
 
   private static final int DATABASE_DEFAULT_PORT = 5432;
@@ -44,6 +45,7 @@ public class PostgreSQLVerticle extends AbstractVerticle {
     final EventBus eventBus = vertx.eventBus();
     eventBus.consumer(EventBusAddress.DATABASE_INSERT, this::databaseInsert);
     eventBus.consumer(EventBusAddress.DATABASE_GET, this::databaseGet);
+    eventBus.consumer(EventBusAddress.DATABASE_UPDATE, this::databaseUpdate);
   }
 
   @Override
@@ -103,6 +105,64 @@ public class PostgreSQLVerticle extends AbstractVerticle {
             IntStream.range(1, fields.size() + 1).mapToObj(i -> "$" + i).collect(Collectors.joining(",")) +
             ")";
     client.preparedQuery(sql, values, ar -> {
+      if (ar.succeeded()) {
+        req.reply(new JsonObject().put("status", "ok"));
+      } else {
+        System.err.println(ar.cause().getMessage());
+        req.reply(new JsonObject().put("status", "error"));
+      }
+    });
+  }
+
+  private void databaseUpdate(Message<JsonObject> req) {
+    final JsonObject updateObject = req.body();
+    final JsonObject data = updateObject.getJsonObject("data");
+    final JsonObject query = updateObject.getJsonObject("query");
+    final List<String> updateFields = new ArrayList<>(data.fieldNames());
+    final List<String> selectFields = new ArrayList<>(query.fieldNames());
+    final String tableName = updateObject.getString("table");
+
+    StringBuilder sql = new StringBuilder();
+    Tuple values = Tuple.tuple();
+    sql.append("UPDATE ");
+    sql.append(tableName);
+    sql.append(" SET ");
+    for (int i = 0; i < updateFields.size(); i++) {
+      String field = updateFields.get(i);
+      sql.append(field);
+      sql.append(" = ");
+      sql.append("$");
+      sql.append(i + 1);
+      sql.append(" ");
+
+      Object fieldValue = data.getValue(field);
+      if(fieldValue instanceof String) {
+        values.addString(((String) fieldValue));
+      } else {
+        throw new AssertionError("Unexpected type: " + fieldValue.getClass().getName());
+      }
+    }
+
+    sql.append("WHERE ");
+    for (int i = 0; i < selectFields.size(); i++) {
+      String field = selectFields.get(i);
+      sql.append(field);
+      sql.append(" = ");
+      sql.append("$");
+      sql.append(i + updateFields.size() + 1);
+      if (i + 1 < selectFields.size()) {
+        sql.append(" AND ");
+      }
+
+      Object fieldValue = query.getValue(field);
+      if(fieldValue instanceof String) {
+        values.addString(((String) fieldValue));
+      } else {
+        throw new AssertionError("Unexpected type: " + fieldValue.getClass().getName());
+      }
+    }
+
+    client.preparedQuery(sql.toString(), values, ar -> {
       if (ar.succeeded()) {
         req.reply(new JsonObject().put("status", "ok"));
       } else {

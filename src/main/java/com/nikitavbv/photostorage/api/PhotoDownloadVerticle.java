@@ -16,14 +16,14 @@ public class PhotoDownloadVerticle extends ApiVerticle {
     )));
   }
 
-  private Future<JsonObject> downloadPhoto(JsonObject downloadPhotoRrequest) {
+  private Future<JsonObject> downloadPhoto(JsonObject downloadPhotoRequest) {
     Future<JsonObject> future = Future.future();
 
-    getUserBySessionToken(downloadPhotoRrequest.getString("access_token")).setHandler(userReply -> {
+    getUserBySessionToken(downloadPhotoRequest.getString("access_token")).setHandler(userReply -> {
       ApplicationUser user = userReply.result();
 
       JsonObject keyQuery = new JsonObject()
-              .put("photo_id", downloadPhotoRrequest.getString("photo_id"))
+              .put("photo_id", downloadPhotoRequest.getString("photo_id"))
               .put("user_id", user.getID());
       JsonObject keySelectOp = new JsonObject()
               .put("table", "keys")
@@ -40,11 +40,11 @@ public class PhotoDownloadVerticle extends ApiVerticle {
         String keyEnc = rows.getJsonObject(0).getString("key_enc");
 
         JsonObject photoInfoQuery = new JsonObject()
-                .put("id", downloadPhotoRrequest.getString("photo_id"));
+                .put("id", downloadPhotoRequest.getString("photo_id"));
         JsonObject photoSelectOp = new JsonObject()
                 .put("table", "photos")
                 .put("query", photoInfoQuery)
-                .put("select_fields", new JsonArray().add("storage_driver").add("storage_key"))
+                .put("select_fields", new JsonArray().add("storage_driver").add("storage_key").add("description"))
                 .put("limit", 1);
         vertx.eventBus().send(EventBusAddress.DATABASE_GET, photoSelectOp, photoInfoRes -> {
           JsonArray photoInfoRows = ((JsonObject) photoInfoRes.result().body()).getJsonArray("rows");
@@ -61,7 +61,8 @@ public class PhotoDownloadVerticle extends ApiVerticle {
             future.complete(new JsonObject()
                     .put("status", "ok")
                     .put("key_enc", keyEnc)
-                    .put("photo_data_enc", photoData));
+                    .put("photo_data_enc", photoData)
+                    .put("description_enc", photoInfo.getString("description")));
           });
         });
       });
