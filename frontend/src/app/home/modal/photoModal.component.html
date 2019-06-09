@@ -4,7 +4,7 @@
 <div class="side-menu">
   <input [(ngModel)]="photo.description" (ngModelChange)="this.photoChanged = true" placeholder="Description..." />
   <input [(ngModel)]="photo.location" (ngModelChange)="this.photoChanged=true" placeholder="Location..." />
-  <span class="uploaded-on">Uploaded on 2019-01-01 01:02:03</span>
+  <span class="uploaded-on">Uploaded on {{ unixTimestampToStr(photo.uploaded_at) }}</span>
   <span class="section-name">tags:</span>
   <div class="tags">
     <div *ngFor="let tag of photo.tags" class="tag">{{ tag }} <span (click)="photo.removeTag(tag)" class="remove">x</span></div>

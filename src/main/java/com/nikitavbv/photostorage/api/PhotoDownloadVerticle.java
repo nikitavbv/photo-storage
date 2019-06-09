@@ -50,6 +50,7 @@ public class PhotoDownloadVerticle extends ApiVerticle {
                         .add("description")
                         .add("location")
                         .add("tags")
+                        .add("upload_timestamp")
                 ).put("limit", 1);
         vertx.eventBus().send(EventBusAddress.DATABASE_GET, photoSelectOp, photoInfoRes -> {
           JsonArray photoInfoRows = ((JsonObject) photoInfoRes.result().body()).getJsonArray("rows");
@@ -67,6 +68,7 @@ public class PhotoDownloadVerticle extends ApiVerticle {
                     .put("status", "ok")
                     .put("key_enc", keyEnc)
                     .put("photo_data_enc", photoData)
+                    .put("uploaded_at", photoInfo.getLong("upload_timestamp"))
                     .put("description_enc", photoInfo.getString("description"))
                     .put("location_enc", photoInfo.getString("location"))
                     .put("tags_enc", photoInfo.getString("tags")));

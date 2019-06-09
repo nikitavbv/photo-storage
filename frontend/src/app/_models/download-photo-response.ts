@@ -4,4 +4,5 @@ export class DownloadPhotoResponse {
   description_enc: string;
   location_enc: string;
   tags_enc: string;
+  uploaded_at: number;
 }

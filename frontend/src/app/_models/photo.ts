@@ -7,6 +7,8 @@ export class Photo {
   data_enc: string;
   data: string;
 
+  uploaded_at: number;
+
   width: number;
   height: number;
 
@@ -23,6 +25,7 @@ export class Photo {
   load(): Promise<Photo> {
     return new Promise((resolve, reject) => {
       this.service.download(this.id).subscribe(res => {
+        this.uploaded_at = res.uploaded_at;
         this.description_enc = res.description_enc;
         this.location_enc = res.location_enc;
         this.tags_enc = res.tags_enc;
