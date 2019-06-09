@@ -14,7 +14,13 @@ export class SearchService {
     if (photo.description && photo.description.indexOf(query.trim()) !== -1) {
       return true;
     }
-    
+
+    for (let tag of photo.tags) {
+      if (query.indexOf(tag) !== -1) {
+        return true;
+      }
+    }
+
     return false;
   }
 }

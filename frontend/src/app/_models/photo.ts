@@ -59,6 +59,8 @@ export class Photo {
           this.crypto.aesDecrypt(this.tags_enc, key).then(data => {
             this.tags = decoder.decode(data).split(':');
           });
+        } else {
+          this.tags = [];
         }
       }, console.error);
     }).then(() => this);
