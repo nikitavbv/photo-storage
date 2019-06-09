@@ -1,6 +1,6 @@
 import {Component, HostListener, OnInit, ViewChild} from "@angular/core";
 import {HeaderComponent} from "./header";
-import {AuthenticationService, CryptoService, PhotoService} from "../_services";
+import {AuthenticationService, CryptoService, PhotoService, SearchService} from "../_services";
 import {Photo} from "../_models/photo";
 import {GetMyPhotosResponse} from "../_models/get-my-photos-response";
 
@@ -20,6 +20,7 @@ export class HomeComponent implements OnInit {
   totalFilesInUpload: number = 0;
 
   photos: Photo[];
+  photosToDisplay: Photo[];
 
   selectedPhoto: Photo;
   showingPhotoModal: boolean = false;
@@ -27,7 +28,10 @@ export class HomeComponent implements OnInit {
   slideshowPhotoIndex: number = 0;
   slideshowInterval: number = -1;
 
-  constructor(private crypto: CryptoService, private photoService: PhotoService, private auth: AuthenticationService) {}
+  constructor(private crypto: CryptoService,
+              private photoService: PhotoService,
+              private auth: AuthenticationService,
+              private search: SearchService) {}
 
   ngOnInit() {
     Promise.all<GetMyPhotosResponse, CryptoKey>([
@@ -39,6 +43,7 @@ export class HomeComponent implements OnInit {
         photo
       ));
       this.photos.forEach(photo => photo.loadAndDecrypt(privateKey));
+      this.photosToDisplay = this.photos;
     }, console.error);
   }
 
@@ -140,5 +145,12 @@ export class HomeComponent implements OnInit {
     this.showingSlideshow = false;
     clearInterval(this.slideshowInterval);
   }
-}
 
+  runSearch(query: string) {
+    if (query === '') {
+      this.photosToDisplay = this.photos;
+    } else {
+      this.photosToDisplay = this.search.filter(this.photos, query);
+    }
+  }
+}

@@ -1,5 +1,5 @@
 <!--suppress HtmlFormInputWithoutLabel -->
-<input class="search" placeholder="Search anything..." />
+<input [(ngModel)]="searchQuery" (ngModelChange)="searchQueryUpdate.emit(searchQuery)" class="search" placeholder="Search anything..." />
 <div [ngClass]="{'slide-from-top': showingNotif, 'slide-to-top': !showingNotif}" class="notif slide-from-top">{{ notifText }}</div>
 <div class="right-nav">
   <button (click)="selectFilesForUpload()">Upload</button>

@@ -1,4 +1,4 @@
-<header (filesToUploadSelected)="uploadFiles($event)" (startSlideshow)="startSlideshow()" ></header>
+<header (filesToUploadSelected)="uploadFiles($event)" (startSlideshow)="startSlideshow()" (searchQueryUpdate)="runSearch($event)" ></header>
 
 <div class="tiles">
   <div class="tile">
@@ -15,7 +15,7 @@
 <div class="gallery">
   <div class="gallery-block">
     <!--<div class="block-label">Just now</div>-->
-    <photo *ngFor="let photo of photos" class="photo" [photo]="photo" (openImageModal)="openPhotoModal(photo)" ></photo>
+    <photo *ngFor="let photo of photosToDisplay" class="photo" [photo]="photo" (openImageModal)="openPhotoModal(photo)" ></photo>
   </div>
 </div>
 

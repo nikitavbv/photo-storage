@@ -12,11 +12,13 @@ export class HeaderComponent {
   notifText: string = '';
   notifCloseTimeout: number = -1;
   showingNotif: boolean = false;
+  searchQuery: string = '';
 
   @ViewChild('fileInput') fileInput;
 
   @Output() filesToUploadSelected: EventEmitter<any> = new EventEmitter<any>();
   @Output() startSlideshow: EventEmitter<void> = new EventEmitter<void>();
+  @Output() searchQueryUpdate: EventEmitter<string> = new EventEmitter<string>();
 
   notif(text: string): void {
     this.notifText = text;
