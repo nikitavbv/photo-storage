@@ -31,6 +31,7 @@ export class PhotoService {
     return this.httpClient.post<UpdatePhotoMetaResponse>(`/api/v1/photos/${photo.id}/meta`, {
       description: photo.description_enc,
       location: photo.location_enc,
+      tags: photo.tags_enc
     })
   }
 }

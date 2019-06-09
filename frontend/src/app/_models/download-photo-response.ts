@@ -3,4 +3,5 @@ export class DownloadPhotoResponse {
   photo_data_enc: string;
   description_enc: string;
   location_enc: string;
+  tags_enc: string;
 }

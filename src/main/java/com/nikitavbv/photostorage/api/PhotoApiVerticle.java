@@ -15,7 +15,7 @@ public class PhotoApiVerticle extends ApiVerticle {
     vertx.eventBus().consumer(EventBusAddress.API_GET_MY_PHOTOS, addJsonConsumer(this::getUserPhotos,
             Collections.singletonList("access_token")));
     vertx.eventBus().consumer(EventBusAddress.API_PHOTO_UPDATE_META, addJsonConsumer(this::updatePhotoMeta,
-            Arrays.asList("access_token", "photo_id", "description")));
+            Arrays.asList("access_token", "photo_id", "description", "location", "tags")));
   }
 
   private Future<JsonObject> updatePhotoMeta(JsonObject req) {
@@ -23,6 +23,7 @@ public class PhotoApiVerticle extends ApiVerticle {
     final String photoID = req.getString("photo_id");
     final String photoDescription = req.getString("description");
     final String photoLocation = req.getString("location");
+    final String tags = req.getString("tags");
 
     getUserBySessionToken(req.getString("access_token")).setHandler(userReply -> {
       ApplicationUser user = userReply.result();
@@ -43,7 +44,8 @@ public class PhotoApiVerticle extends ApiVerticle {
 
         JsonObject updateMeta = new JsonObject()
                 .put("description", photoDescription)
-                .put("location", photoLocation);
+                .put("location", photoLocation)
+                .put("tags", tags);
         JsonObject updateMetaOp = new JsonObject()
                 .put("table", "photos")
                 .put("data", updateMeta)

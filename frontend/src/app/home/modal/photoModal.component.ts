@@ -11,7 +11,8 @@ export class PhotoModalComponent {
   @Input() photo: Photo;
   @Output() closeModal: EventEmitter<void> = new EventEmitter();
 
-  photoChanged = false;
+  photoChanged: boolean = false;
+  newTagName: string = '';
 
   @HostListener('document:keydown.escape', ['$event'])
   onKeydownHandler() {

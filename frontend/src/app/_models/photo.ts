@@ -15,6 +15,8 @@ export class Photo {
   description: string;
   location_enc: string;
   location: string;
+  tags_enc: string;
+  tags: string[];
 
   constructor(private service: PhotoService, private crypto: CryptoService) {}
 
@@ -23,6 +25,7 @@ export class Photo {
       this.service.download(this.id).subscribe(res => {
         this.description_enc = res.description_enc;
         this.location_enc = res.location_enc;
+        this.tags_enc = res.tags_enc;
         this.key_enc = res.key_enc;
         this.data_enc = res.photo_data_enc;
         resolve(this);
@@ -49,6 +52,11 @@ export class Photo {
             this.location = decoder.decode(data);
           });
         }
+        if (this.tags_enc != null) {
+          this.crypto.aesDecrypt(this.tags_enc, key).then(data => {
+            this.tags = decoder.decode(data).split(':');
+          });
+        }
       }, console.error);
     }).then(() => this);
   }
@@ -58,9 +66,11 @@ export class Photo {
     Promise.all<string>([
       this.crypto.aesEncrypt(encoder.encode(this.description), this.key),
       this.crypto.aesEncrypt(encoder.encode(this.location), this.key),
-    ]).then(([description, location]) => {
+      this.crypto.aesEncrypt(encoder.encode(this.tags.join(':')), this.key)
+    ]).then(([description, location, tags]) => {
       this.description_enc = description;
       this.location_enc = location;
+      this.tags_enc = tags;
       this.service.updateMeta(this).subscribe(() => {}, console.error);
     });
   }
@@ -72,5 +82,18 @@ export class Photo {
       this.height = image.height;
     };
     image.src = this.data;
+  }
+
+  removeTag(tag: string) {
+    const index = this.tags.indexOf(tag);
+    if (index !== -1) {
+      this.tags.splice(index, 1);
+      this.saveMetaUpdates();
+    }
+  }
+
+  addTag(tag: string) {
+    this.tags.push(tag);
+    this.saveMetaUpdates();
   }
 }

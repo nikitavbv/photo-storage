@@ -7,10 +7,8 @@
   <span class="uploaded-on">Uploaded on 2019-01-01 01:02:03</span>
   <span class="section-name">tags:</span>
   <div class="tags">
-    <div class="tag">tag1 <span class="remove">x</span></div>
-    <div class="tag">tag2 <span class="remove">x</span></div>
-    <div class="tag">tag3 <span class="remove">x</span></div>
+    <div *ngFor="let tag of photo.tags" class="tag">{{ tag }} <span (click)="photo.removeTag(tag)" class="remove">x</span></div>
   </div>
-  <input class="add-tag-input" placeholder="New tag name..." /><button class="add-tag-btn">Add</button>
+  <input [(ngModel)]="newTagName" class="add-tag-input" placeholder="New tag name..." /><button (click)="photo.addTag(newTagName); newTagName = ''" class="add-tag-btn">Add</button>
   <button class="download-btn">Download</button>
 </div>
