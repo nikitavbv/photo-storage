@@ -49,6 +49,10 @@ export class AuthenticationService {
     return this.crypto.importRSAPublicKey(localStorage.getItem('public_key'));
   }
 
+  privateKey(): Promise<CryptoKey> {
+    return this.crypto.importRSAPrivateKey(localStorage.getItem('private_key'));
+  }
+
   // noinspection JSMethodCanBeStatic
   isLoggedIn(): boolean {
     return localStorage && localStorage.getItem('access_token') != undefined;

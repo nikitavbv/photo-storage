@@ -31,9 +31,6 @@
               "src/styles.less"
             ],
             "scripts": [
-              "src/assets/cryptico.min.js",
-              "src/assets/scrypt.js",
-              "src/assets/buffer.js"
             ],
             "es5BrowserSupport": true
           },

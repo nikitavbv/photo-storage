@@ -44,6 +44,30 @@ export class CryptoService {
     });
   }
 
+  aesDecrypt(dataToDecrypt: string, key: CryptoKey): Promise<Uint8Array> {
+    return new Promise<Uint8Array>((resolve, reject) => {
+      const bytes = CryptoService.stringToUInt8Array(dataToDecrypt);
+      const iv = new Uint8Array(bytes[0]);
+      const encryptedBytes = new Uint8Array(bytes.length - iv.length - 1);
+      for (let i = 0; i < iv.length; i++) {
+        iv[i] = bytes[i + 1];
+      }
+      for (let i = 0; i < encryptedBytes.length; i++) {
+        encryptedBytes[i] = bytes[i + 1 + iv.length];
+      }
+
+      crypto.subtle.decrypt(
+        {
+          name: 'AES-GCM',
+          iv,
+          tagLength: this.AES_TAG_LENGTH
+        },
+        key,
+        encryptedBytes
+      ).then(data => resolve(new Uint8Array(data)), reject);
+    });
+  }
+
   rsaEncrypt(publicKey: CryptoKey, dataToEncrypt: Uint8Array): Promise<Uint8Array> {
     return new Promise<Uint8Array>(resolve => {
       window.crypto.subtle.encrypt(
@@ -148,6 +172,20 @@ export class CryptoService {
     });
   }
 
+  decryptAESKeyWithPrivateRSA(aesKeyData: string, privateRSAKey: CryptoKey): Promise<CryptoKey> {
+    return new Promise((resolve, reject) => {
+      this.rsaDecrypt(privateRSAKey, CryptoService.stringToUInt8Array(aesKeyData)).then(keyData => {
+        return window.crypto.subtle.importKey(
+          'raw',
+          keyData,
+          'AES-GCM',
+          false,
+          ['decrypt']
+        ).then(key => resolve(key), reject);
+      });
+    });
+  }
+
   decryptPrivateRSAKeyWithAES(encrypted: string, aesKey: CryptoKey): Promise<CryptoKey> {
     const bytes = CryptoService.stringToUInt8Array(encrypted);
     const iv = new Uint8Array(bytes[0]);
@@ -209,6 +247,21 @@ export class CryptoService {
   exportRSAPrivateKey(privateRSAKey: CryptoKey): Promise<string> {
     return new Promise<string>(resolve => crypto.subtle.exportKey('pkcs8', privateRSAKey)
       .then(keyData => resolve(CryptoService.arrayBufferToString(keyData))));
+  }
+
+  importRSAPrivateKey(privateKeyString: string): Promise<CryptoKey> {
+    return new Promise((resolve, reject) => {
+      crypto.subtle.importKey(
+        'pkcs8',
+        CryptoService.stringToUInt8Array(privateKeyString),
+        {
+          name: 'RSA-OAEP',
+          hash: { name: this.RSA_HASH }
+        },
+        false,
+        ['decrypt']
+      ).then(resolve, reject);
+    });
   }
 
   static uInt8ArrayToString(arr: Uint8Array): string {

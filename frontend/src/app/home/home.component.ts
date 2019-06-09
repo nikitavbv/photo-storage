@@ -1,17 +1,15 @@
-import {Component, HostListener, ViewChild} from "@angular/core";
+import {Component, HostListener, OnInit, ViewChild} from "@angular/core";
 import {HeaderComponent} from "./header";
 import {AuthenticationService, CryptoService, PhotoService} from "../_services";
-
-declare const cryptico: any;
+import {Photo} from "../_models/photo";
+import {GetMyPhotosResponse} from "../_models/get-my-photos-response";
 
 @Component({
   selector: 'home',
   templateUrl: 'home.component.html',
   styleUrls: ['home.component.less']
 })
-export class HomeComponent {
-
-  readonly NOTIF_SHOW_TIME = 5000;
+export class HomeComponent implements OnInit {
 
   @ViewChild(HeaderComponent)
   private header: HeaderComponent;
@@ -19,7 +17,22 @@ export class HomeComponent {
   photoDragInProgress: boolean = false;
   totalFilesInUpload: number = 0;
 
+  photos: Photo[];
+
   constructor(private crypto: CryptoService, private photoService: PhotoService, private auth: AuthenticationService) {}
+
+  ngOnInit() {
+    Promise.all<GetMyPhotosResponse, CryptoKey>([
+      this.photoService.get_my_photos(),
+      this.auth.privateKey()
+    ]).then(([photos, privateKey]) => {
+      this.photos = photos.photos.map(photo => Object.assign(
+        new Photo(this.photoService, this.crypto),
+        photo
+      ));
+      this.photos.forEach(photo => photo.loadAndDecrypt(privateKey));
+    }, console.error);
+  }
 
   @HostListener('dragover', ['$event'])
   dragover(event: any): void {
@@ -33,9 +46,12 @@ export class HomeComponent {
     event.preventDefault();
     event.stopPropagation();
     this.photoDragInProgress = false;
+    this.uploadFiles(event.dataTransfer.files);
+  }
 
-    for (let i = 0; i < event.dataTransfer.files.length; i++) {
-      this.startFileUpload(event.dataTransfer.files[i]);
+  uploadFiles(files): void {
+    for (let i = 0; i < files.length; i++) {
+      this.startFileUpload(files[i]);
     }
   }
 
@@ -53,22 +69,25 @@ export class HomeComponent {
   startFileUpload(file: any): void {
     this.totalFilesInUpload++;
     this.updateUploadNotif();
-    console.log('started');
 
     Promise.all<Uint8Array, CryptoKey, CryptoKey>([
       this.readFileAsDataUrl(file),
       this.crypto.randomAESKey(),
       this.auth.publicKey()
     ]).then(([data, photoEncKey, publicKey]) => {
-      return Promise.all<string, string>([
+      return Promise.all<string, string, string>([
+        Promise.resolve<string>(new TextDecoder().decode(data)),
         this.crypto.aesEncrypt(data, photoEncKey),
         this.crypto.encryptAESKeyWithPublicRSA(photoEncKey, publicKey)
       ])
-    }).then(([encryptedData, encryptedRsaKey]) => {
+    }).then(([data, encryptedData, encryptedRsaKey]) => {
       this.photoService.upload(encryptedData, encryptedRsaKey).subscribe((res) => {
         console.log(res);
         this.totalFilesInUpload--;
         this.updateUploadNotif();
+        const photo = new Photo(this.photoService, this.crypto);
+        photo.data = data;
+        this.photos.unshift(photo);
       }, console.error);
     });
   }

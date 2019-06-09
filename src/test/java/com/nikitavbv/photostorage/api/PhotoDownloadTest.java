@@ -66,7 +66,6 @@ public class PhotoDownloadTest {
           JsonObject photoObj = new JsonObject();
           photoObj.put("storage_driver", "filesystem");
           photoObj.put("storage_key", photoID);
-          photoObj.put("photo_data_iv", "bb");
           getReq.reply(new JsonObject().put("rows", new JsonArray().add(photoObj)));
           break;
         default:
@@ -85,7 +84,6 @@ public class PhotoDownloadTest {
       JsonObject photoDownloadResult = ((JsonObject) photoDownloadResponse.result().body());
       context.assertEquals("ok", photoDownloadResult.getString("status"));
       context.assertTrue(photoDownloadResult.containsKey("photo_data_enc"));
-      context.assertTrue(photoDownloadResult.containsKey("photo_data_iv"));
       context.assertTrue(photoDownloadResult.containsKey("key_enc"));
       downloadAsync.complete();
     });

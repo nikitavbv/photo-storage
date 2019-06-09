@@ -1,4 +1,4 @@
-import {Component} from "@angular/core";
+import {Component, EventEmitter, Output, ViewChild} from "@angular/core";
 
 @Component({
   selector: 'header',
@@ -13,6 +13,10 @@ export class HeaderComponent {
   notifCloseTimeout: number = -1;
   showingNotif: boolean = false;
 
+  @ViewChild('fileInput') fileInput;
+
+  @Output() filesToUploadSelected: EventEmitter<any> = new EventEmitter<any>();
+
   notif(text: string): void {
     this.notifText = text;
     this.showingNotif = true;
@@ -22,6 +26,14 @@ export class HeaderComponent {
     this.notifCloseTimeout = setTimeout(() => {
       this.showingNotif = false;
     }, this.NOTIF_SHOW_TIME);
+  }
+
+  selectFilesForUpload() {
+    this.fileInput.nativeElement.click();
+  }
+
+  onFilesSelected(e: Event) {
+    this.filesToUploadSelected.emit((e.target as any).files);
   }
 }
 
