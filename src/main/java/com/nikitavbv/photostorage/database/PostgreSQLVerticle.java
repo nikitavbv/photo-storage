@@ -133,6 +133,11 @@ public class PostgreSQLVerticle extends AbstractVerticle {
       sql.append(" = ");
       sql.append("$");
       sql.append(i + 1);
+
+      if (i + 1< updateFields.size()) {
+        sql.append(",");
+      }
+
       sql.append(" ");
 
       Object fieldValue = data.getValue(field);

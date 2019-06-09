@@ -29,7 +29,8 @@ export class PhotoService {
 
   updateMeta(photo: Photo): Observable<UpdatePhotoMetaResponse> {
     return this.httpClient.post<UpdatePhotoMetaResponse>(`/api/v1/photos/${photo.id}/meta`, {
-      description: photo.description_enc
+      description: photo.description_enc,
+      location: photo.location_enc,
     })
   }
 }

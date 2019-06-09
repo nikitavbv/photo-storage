@@ -1,4 +1,4 @@
-import {AuthenticationService, CryptoService, PhotoService} from "../_services";
+import {CryptoService, PhotoService} from "../_services";
 
 export class Photo {
   id: string;
@@ -13,6 +13,8 @@ export class Photo {
   // meta
   description_enc: string;
   description: string;
+  location_enc: string;
+  location: string;
 
   constructor(private service: PhotoService, private crypto: CryptoService) {}
 
@@ -20,6 +22,7 @@ export class Photo {
     return new Promise((resolve, reject) => {
       this.service.download(this.id).subscribe(res => {
         this.description_enc = res.description_enc;
+        this.location_enc = res.location_enc;
         this.key_enc = res.key_enc;
         this.data_enc = res.photo_data_enc;
         resolve(this);
@@ -41,15 +44,23 @@ export class Photo {
             this.description = decoder.decode(data);
           });
         }
+        if (this.location_enc != null) {
+          this.crypto.aesDecrypt(this.location_enc, key).then(data => {
+            this.location = decoder.decode(data);
+          });
+        }
       }, console.error);
     }).then(() => this);
   }
 
   saveMetaUpdates() {
+    const encoder = new TextEncoder();
     Promise.all<string>([
-      this.crypto.aesEncrypt(new TextEncoder().encode(this.description), this.key)
-    ]).then(([description]) => {
+      this.crypto.aesEncrypt(encoder.encode(this.description), this.key),
+      this.crypto.aesEncrypt(encoder.encode(this.location), this.key),
+    ]).then(([description, location]) => {
       this.description_enc = description;
+      this.location_enc = location;
       this.service.updateMeta(this).subscribe(() => {}, console.error);
     });
   }

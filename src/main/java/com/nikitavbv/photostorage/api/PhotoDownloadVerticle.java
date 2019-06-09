@@ -44,8 +44,12 @@ public class PhotoDownloadVerticle extends ApiVerticle {
         JsonObject photoSelectOp = new JsonObject()
                 .put("table", "photos")
                 .put("query", photoInfoQuery)
-                .put("select_fields", new JsonArray().add("storage_driver").add("storage_key").add("description"))
-                .put("limit", 1);
+                .put("select_fields", new JsonArray()
+                        .add("storage_driver")
+                        .add("storage_key")
+                        .add("description")
+                        .add("location")
+                ).put("limit", 1);
         vertx.eventBus().send(EventBusAddress.DATABASE_GET, photoSelectOp, photoInfoRes -> {
           JsonArray photoInfoRows = ((JsonObject) photoInfoRes.result().body()).getJsonArray("rows");
           JsonObject photoInfo = photoInfoRows.getJsonObject(0);
@@ -62,7 +66,8 @@ public class PhotoDownloadVerticle extends ApiVerticle {
                     .put("status", "ok")
                     .put("key_enc", keyEnc)
                     .put("photo_data_enc", photoData)
-                    .put("description_enc", photoInfo.getString("description")));
+                    .put("description_enc", photoInfo.getString("description"))
+                    .put("location_enc", photoInfo.getString("location")));
           });
         });
       });

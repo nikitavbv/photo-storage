@@ -22,6 +22,7 @@ public class PhotoApiVerticle extends ApiVerticle {
     Future<JsonObject> future = Future.future();
     final String photoID = req.getString("photo_id");
     final String photoDescription = req.getString("description");
+    final String photoLocation = req.getString("location");
 
     getUserBySessionToken(req.getString("access_token")).setHandler(userReply -> {
       ApplicationUser user = userReply.result();
@@ -41,7 +42,8 @@ public class PhotoApiVerticle extends ApiVerticle {
         }
 
         JsonObject updateMeta = new JsonObject()
-                .put("description", photoDescription);
+                .put("description", photoDescription)
+                .put("location", photoLocation);
         JsonObject updateMetaOp = new JsonObject()
                 .put("table", "photos")
                 .put("data", updateMeta)
