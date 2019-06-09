@@ -1,4 +1,4 @@
-import {Component, Input} from "@angular/core";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {Photo} from "../../_models/photo";
 
 @Component({
@@ -9,5 +9,6 @@ import {Photo} from "../../_models/photo";
 export class PhotoComponent {
 
   @Input() photo: Photo;
+  @Output() openImageModal: EventEmitter<Photo> = new EventEmitter<Photo>();
 }
 

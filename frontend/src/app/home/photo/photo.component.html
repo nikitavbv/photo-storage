@@ -1,1 +1,1 @@
-<div [ngStyle]="{'background-image': photo.data ? 'url(' + photo.data + ')' : undefined }" ></div>
+<div (click)="openImageModal.emit(photo)" [ngStyle]="{'background-image': photo.data ? 'url(' + photo.data + ')' : undefined }" ></div>

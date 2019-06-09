@@ -19,6 +19,9 @@ export class HomeComponent implements OnInit {
 
   photos: Photo[];
 
+  selectedPhoto: Photo;
+  showingPhotoModal: boolean = false;
+
   constructor(private crypto: CryptoService, private photoService: PhotoService, private auth: AuthenticationService) {}
 
   ngOnInit() {
@@ -110,6 +113,11 @@ export class HomeComponent implements OnInit {
       };
       fileReader.readAsDataURL(file);
     });
+  }
+
+  openPhotoModal(photo: Photo) {
+    this.selectedPhoto = photo;
+    this.showingPhotoModal = true;
   }
 }
 

@@ -10,7 +10,7 @@ import { AppComponent } from './app.component';
 import {AuthComponent, LandingComponent, SignInComponent} from "./landing";
 import {SignUpComponent} from "./landing/auth/sign-up";
 import {FormsModule} from "@angular/forms";
-import {HeaderComponent, HomeComponent, PhotoComponent} from "./home";
+import {HeaderComponent, HomeComponent, PhotoComponent, PhotoModalComponent} from "./home";
 
 @NgModule({
   declarations: [
@@ -20,6 +20,7 @@ import {HeaderComponent, HomeComponent, PhotoComponent} from "./home";
     HomeComponent,
     LandingComponent,
     PhotoComponent,
+    PhotoModalComponent,
     SignInComponent,
     SignUpComponent
   ],

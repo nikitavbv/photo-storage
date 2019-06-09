@@ -1,0 +1,156 @@
+@import '../../variables';
+
+@side_menu_width: 460px;
+
+:host {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  user-select: none;
+  text-align: center;
+  line-height: 100vh;
+  background: linear-gradient(
+    rgba(0, 150, 136, 0.9),
+    rgba(0, 150, 136, 0.9)
+  );
+  color: white;
+  font-size: 40pt;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 100;
+}
+
+.side-menu {
+  background-color: white;
+  position: fixed;
+  right: 0;
+  width: @side_menu_width;
+  top: 0;
+  bottom: 0;
+  color: @text_primary_color;
+  line-height: 20pt;
+}
+
+.photo-view {
+  width: calc(100% - @side_menu_width);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+}
+
+.photo {
+  border-radius: 4px;
+  background-size: cover;
+  background-color: @white_darker_background;
+}
+
+.photo-h {
+  width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+.photo-v {
+  height: 100%;
+  width: auto;
+}
+
+button, input {
+  display: block;
+  height: 48px;
+  outline: none;
+  border-radius: 5px;
+  margin: 10px auto;
+  width: 400px;
+  box-sizing: border-box;
+  font-weight: 300;
+  font-size: 14pt;
+  font-family: 'Open Sans', sans-serif;
+}
+
+input {
+  border: 1px solid #f2f2f2;
+  background-color: white;
+  color: @text_secondary_color;
+  padding: 0 16px;
+}
+
+button {
+  text-align: center;
+  background-color: @primary_color;
+  color: white;
+  transition: all 0.4s ease-out;
+  border: 1px solid @primary_color;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: white;
+  color: @primary_color;
+}
+
+span {
+  display: block;
+  font-size: 14pt;
+  line-height: 20pt;
+  text-align: left;
+}
+
+.uploaded-on {
+  font-size: 12pt;
+  display: block;
+  color: @text_secondary_color;
+  text-align: left;
+  margin-left: 30px;
+}
+
+.section-name {
+  margin: 8px 0 8px 30px;
+}
+
+.tags {
+  display: flex;
+  padding: 4px 30px;
+}
+
+.tags, .tags .tag {
+  line-height: 20pt;
+  font-size: 14pt;
+}
+
+.tag {
+  display: inline-block;
+  background-color: @primary_color;
+  color: white;
+  border-radius: 100px;
+  padding: 6px 14px;
+  margin: 0 10px 0 0;
+  line-height: 14pt;
+
+  span {
+    display: inline;
+    padding: 0 0 0 7px;
+    cursor: pointer;
+  }
+
+  .remove {
+    font-size: 10pt;
+    line-height: 17pt;
+    height: 100%;
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+.add-tag-input {
+  width: 275px;
+  display: inline;
+}
+
+.add-tag-btn {
+  margin-left: 25px;
+  width: 100px;
+  display: inline;
+}
