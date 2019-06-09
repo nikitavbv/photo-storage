@@ -16,6 +16,7 @@ export class HeaderComponent {
   @ViewChild('fileInput') fileInput;
 
   @Output() filesToUploadSelected: EventEmitter<any> = new EventEmitter<any>();
+  @Output() startSlideshow: EventEmitter<void> = new EventEmitter<void>();
 
   notif(text: string): void {
     this.notifText = text;

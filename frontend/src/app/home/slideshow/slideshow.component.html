@@ -1,0 +1,3 @@
+<div class="photo-view">
+  <img class="photo" [ngClass]="{'photo-v': photo.height > photo.width, 'photo-h': !(photo.height > photo.width)}" src="{{photo.data}}"  alt="photo"/>
+</div>

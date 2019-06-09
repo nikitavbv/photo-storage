@@ -1,4 +1,4 @@
-<header (filesToUploadSelected)="uploadFiles($event)" ></header>
+<header (filesToUploadSelected)="uploadFiles($event)" (startSlideshow)="startSlideshow()" ></header>
 
 <div class="tiles">
   <div class="tile">
@@ -24,3 +24,4 @@
 </div>
 
 <photo-modal *ngIf="showingPhotoModal" [photo]="selectedPhoto" (closeModal)="showingPhotoModal = false"></photo-modal>
+<slideshow *ngIf="showingSlideshow" [photo]="photos[slideshowPhotoIndex]" (closeModal)="stopSlideshow()"></slideshow>

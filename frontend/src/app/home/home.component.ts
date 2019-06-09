@@ -11,6 +11,8 @@ import {GetMyPhotosResponse} from "../_models/get-my-photos-response";
 })
 export class HomeComponent implements OnInit {
 
+  readonly SLIDESHOW_PHOTO_INTERVAL = 3000; // 3 seconds
+
   @ViewChild(HeaderComponent)
   private header: HeaderComponent;
 
@@ -21,6 +23,9 @@ export class HomeComponent implements OnInit {
 
   selectedPhoto: Photo;
   showingPhotoModal: boolean = false;
+  showingSlideshow: boolean;
+  slideshowPhotoIndex: number = 0;
+  slideshowInterval: number = -1;
 
   constructor(private crypto: CryptoService, private photoService: PhotoService, private auth: AuthenticationService) {}
 
@@ -118,6 +123,22 @@ export class HomeComponent implements OnInit {
   openPhotoModal(photo: Photo) {
     this.selectedPhoto = photo;
     this.showingPhotoModal = true;
+  }
+
+  startSlideshow() {
+    this.showingSlideshow = true;
+    this.slideshowPhotoIndex = 0;
+    this.slideshowInterval = setInterval(() => {
+      this.slideshowPhotoIndex++;
+      if (this.slideshowPhotoIndex == this.photos.length) {
+        this.stopSlideshow();
+      }
+    }, this.SLIDESHOW_PHOTO_INTERVAL);
+  }
+
+  stopSlideshow() {
+    this.showingSlideshow = false;
+    clearInterval(this.slideshowInterval);
   }
 }
 
