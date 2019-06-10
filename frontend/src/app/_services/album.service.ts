@@ -48,4 +48,12 @@ export class AlbumService {
   inAlbum(id: string): boolean {
     return this.photos[id] !== undefined;
   }
+
+  get_by_id(id: string): Album {
+    for (let album of this.albums) {
+      if (album.id === id) {
+        return album;
+      }
+    }
+  }
 }

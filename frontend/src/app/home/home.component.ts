@@ -34,6 +34,12 @@ export class HomeComponent implements OnInit {
 
   tileStyle: string[] = ['', '', '', '', '', '', '', '', '', '', '', ''];
 
+  searchQuery: string = '';
+
+  blocks: any;
+
+  objectKeys = Object.keys;
+
   constructor(private crypto: CryptoService,
               private photoService: PhotoService,
               private auth: AuthenticationService,
@@ -167,10 +173,62 @@ export class HomeComponent implements OnInit {
     clearInterval(this.slideshowInterval);
   }
 
+  albumBlocks() {
+    let result = {};
+    this.photos.forEach(photo => {
+      if (this.albumService.photos[photo.id]) {
+        const name = this.albumService.get_by_id(this.albumService.photos[photo.id]).name;
+        if (result[name]) {
+          result[name].push(photo);
+        } else {
+          result[name] = [photo];
+        }
+      }
+    });
+    return result;
+  }
+
+  tagBlocks() {
+    let result = {};
+    this.photos.forEach(photo => {
+      photo.tags.forEach(tag => {
+        if (result[tag]) {
+          result[tag].push(photo);
+        } else {
+          result[tag] = [photo];
+        }
+      });
+    });
+    return result;
+  }
+
+  locationBlocks() {
+    let result = {};
+    this.photos.forEach(photo => {
+      const tag = photo.location;
+      if (tag) {
+        if (result[tag]) {
+          result[tag].push(photo);
+        } else {
+          result[tag] = [photo];
+        }
+      }
+    });
+    return result;
+  }
+
   runSearch(query: string) {
     if (query === '') {
       this.photosToDisplay = this.photos;
+      this.blocks = undefined;
+    } else if (query === 'view:albums') {
+      this.blocks = this.albumBlocks();
+    } else if (query === 'view:tags') {
+      this.blocks = this.tagBlocks();
+    } else if (query === 'view:locations') {
+      this.blocks = this.locationBlocks();
     } else {
+      this.blocks = undefined;
       this.photosToDisplay = this.search.filter(this.photos, query);
     }
   }

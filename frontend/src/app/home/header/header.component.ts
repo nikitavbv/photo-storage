@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output, ViewChild} from "@angular/core";
+import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {AuthenticationService, CryptoService} from "../../_services";
 import {AlbumService} from "../../_services/album.service";
 
@@ -14,7 +14,7 @@ export class HeaderComponent {
   notifText: string = '';
   notifCloseTimeout: number = -1;
   showingNotif: boolean = false;
-  searchQuery: string = '';
+  @Input() searchQuery: string = '';
   creatingAlbum: boolean = false;
   newAlbumName: string = '';
 
