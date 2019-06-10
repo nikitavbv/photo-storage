@@ -6,6 +6,7 @@ import {GetMyPhotosResponse} from "../_models/get-my-photos-response";
 import {DownloadPhotoResponse} from "../_models/download-photo-response";
 import {Photo} from "../_models/photo";
 import {UpdatePhotoMetaResponse} from "../_models/UpdatePhotoMetaResponse";
+import {AddPhotoKeyResponse} from "../_models/add-photo-key-response";
 
 @Injectable()
 export class PhotoService {
@@ -33,5 +34,12 @@ export class PhotoService {
       location: photo.location_enc,
       tags: photo.tags_enc
     })
+  }
+
+  addPhotoKey(photoID: string, user_id: number, key: string): Observable<AddPhotoKeyResponse> {
+    return this.httpClient.post<AddPhotoKeyResponse>(`/api/v1/photos/${photoID}/keys`, {
+      user_id,
+      key
+    });
   }
 }

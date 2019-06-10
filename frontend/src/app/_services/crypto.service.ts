@@ -179,7 +179,7 @@ export class CryptoService {
           'raw',
           keyData,
           'AES-GCM',
-          false,
+          true,
           ['decrypt', 'encrypt']
         ).then(key => resolve(key), reject);
       });

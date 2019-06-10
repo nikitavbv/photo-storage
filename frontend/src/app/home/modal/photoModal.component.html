@@ -10,5 +10,6 @@
     <div *ngFor="let tag of photo.tags" class="tag">{{ tag }} <span (click)="photo.removeTag(tag)" class="remove">x</span></div>
   </div>
   <input [(ngModel)]="newTagName" class="add-tag-input" placeholder="New tag name..." /><button (click)="photo.addTag(newTagName); newTagName = ''" class="add-tag-btn">Add</button>
+  <input [(ngModel)]="shareWithUserName" class="share-input" placeholder="Share with user..." /><button (click)="photo.shareWithUser(shareWithUserName); shareWithUserName = ''" class="share-btn">Share</button>
   <button class="download-btn" (click)="photo.download()">Download</button>
 </div>

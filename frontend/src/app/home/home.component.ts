@@ -1,6 +1,6 @@
 import {Component, HostListener, OnInit, ViewChild} from "@angular/core";
 import {HeaderComponent} from "./header";
-import {AuthenticationService, CryptoService, PhotoService, SearchService} from "../_services";
+import {AuthenticationService, CryptoService, PhotoService, SearchService, UserService} from "../_services";
 import {Photo} from "../_models/photo";
 import {GetMyPhotosResponse} from "../_models/get-my-photos-response";
 
@@ -31,7 +31,8 @@ export class HomeComponent implements OnInit {
   constructor(private crypto: CryptoService,
               private photoService: PhotoService,
               private auth: AuthenticationService,
-              private search: SearchService) {}
+              private search: SearchService,
+              private userService: UserService) {}
 
   ngOnInit() {
     Promise.all<GetMyPhotosResponse, CryptoKey>([
@@ -39,7 +40,7 @@ export class HomeComponent implements OnInit {
       this.auth.privateKey()
     ]).then(([photos, privateKey]) => {
       this.photos = photos.photos.map(photo => Object.assign(
-        new Photo(this.photoService, this.crypto),
+        new Photo(this.photoService, this.crypto, this.userService),
         photo
       ));
       this.photos.forEach(photo => photo.loadAndDecrypt(privateKey));
@@ -98,7 +99,7 @@ export class HomeComponent implements OnInit {
         console.log(res);
         this.totalFilesInUpload--;
         this.updateUploadNotif();
-        const photo = new Photo(this.photoService, this.crypto);
+        const photo = new Photo(this.photoService, this.crypto, this.userService);
         photo.data = data;
         this.photos.unshift(photo);
       }, console.error);

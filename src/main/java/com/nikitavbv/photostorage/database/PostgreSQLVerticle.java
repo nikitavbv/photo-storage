@@ -203,13 +203,18 @@ public class PostgreSQLVerticle extends AbstractVerticle {
       sql.append(" ");
       sql.append("$");
       sql.append(i + 1);
-      i++;
+
+      if (i + 1 < fields.size()) {
+        sql.append(" AND ");
+      }
 
       Object fieldValue = query.getValue(field);
       if (fieldValue instanceof String) {
         values.addString((String) fieldValue);
       } else if (fieldValue instanceof Integer) {
         values.addInteger((Integer) fieldValue);
+      } else if (fieldValue instanceof Long) {
+        values.addLong((Long) fieldValue);
       } else {
         throw new AssertionError("Unexpected type: " + fieldValue.getClass().getName());
       }

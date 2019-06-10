@@ -4,7 +4,14 @@ import { AppRoutingModule } from './app-routing.module';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 
 import { AuthGuard } from "./_guard";
-import {AuthenticationService, CryptoService, PageTitleService, PhotoService, SearchService} from "./_services";
+import {
+  AuthenticationService,
+  CryptoService,
+  PageTitleService,
+  PhotoService,
+  SearchService,
+  UserService
+} from "./_services";
 import { JwtInterceptor } from "./_helpers";
 import { AppComponent } from './app.component';
 import {AuthComponent, LandingComponent, SignInComponent} from "./landing";
@@ -38,6 +45,7 @@ import {HeaderComponent, HomeComponent, PhotoComponent, PhotoModalComponent, Sli
     PageTitleService,
     PhotoService,
     SearchService,
+    UserService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

@@ -15,6 +15,7 @@ export class PhotoModalComponent {
 
   photoChanged: boolean = false;
   newTagName: string = '';
+  shareWithUserName: string = '';
 
   @HostListener('document:keydown.escape', ['$event'])
   onKeydownHandler() {

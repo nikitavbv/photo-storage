@@ -1,4 +1,4 @@
-import {CryptoService, PhotoService} from "../_services";
+import {AuthenticationService, CryptoService, PhotoService, UserService} from "../_services";
 
 export class Photo {
   id: string;
@@ -20,7 +20,7 @@ export class Photo {
   tags_enc: string;
   tags: string[];
 
-  constructor(private service: PhotoService, private crypto: CryptoService) {}
+  constructor(private service: PhotoService, private crypto: CryptoService, private userService: UserService) {}
 
   load(): Promise<Photo> {
     return new Promise((resolve, reject) => {
@@ -38,6 +38,7 @@ export class Photo {
 
   loadAndDecrypt(privateKey: CryptoKey): Promise<Photo> {
     return this.load().then(() => {
+      console.log('key enc', this.key_enc);
       this.crypto.decryptAESKeyWithPrivateRSA(this.key_enc, privateKey).then(key => {
         this.key = key;
         const decoder = new TextDecoder();
@@ -113,5 +114,15 @@ export class Photo {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  shareWithUser(name: string) {
+    this.userService.getPublicKey(name).subscribe(res => {
+      this.crypto.importRSAPublicKey(res.public_key).then(publicKey => {
+        this.crypto.encryptAESKeyWithPublicRSA(this.key, publicKey).then(encrypted => {
+          this.service.addPhotoKey(this.id, res.id, encrypted).subscribe(console.log, console.error);
+        });
+      })
+    }, console.error);
   }
 }
