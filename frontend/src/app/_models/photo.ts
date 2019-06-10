@@ -1,4 +1,5 @@
-import {AuthenticationService, CryptoService, PhotoService, UserService} from "../_services";
+import {CryptoService, PhotoService, UserService} from "../_services";
+import {AlbumService} from "../_services/album.service";
 
 export class Photo {
   id: string;
@@ -20,7 +21,10 @@ export class Photo {
   tags_enc: string;
   tags: string[];
 
-  constructor(private service: PhotoService, private crypto: CryptoService, private userService: UserService) {}
+  constructor(private service: PhotoService,
+              private crypto: CryptoService,
+              private userService: UserService,
+              private albumService: AlbumService) {}
 
   load(): Promise<Photo> {
     return new Promise((resolve, reject) => {
@@ -123,5 +127,9 @@ export class Photo {
         });
       })
     }, console.error);
+  }
+
+  inAlbum(): boolean {
+    return this.albumService.inAlbum(this.id);
   }
 }

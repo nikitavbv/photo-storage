@@ -1,5 +1,6 @@
 import {Component, EventEmitter, HostListener, Input, Output} from "@angular/core";
 import {Photo} from "../../_models/photo";
+import {AlbumService} from "../../_services/album.service";
 
 @Component({
   selector: 'photo-modal',
@@ -16,6 +17,10 @@ export class PhotoModalComponent {
   photoChanged: boolean = false;
   newTagName: string = '';
   shareWithUserName: string = '';
+
+  prevAlbum: string = '';
+
+  constructor(private albumService: AlbumService) {}
 
   @HostListener('document:keydown.escape', ['$event'])
   onKeydownHandler() {
@@ -34,6 +39,22 @@ export class PhotoModalComponent {
     const min = a.getMinutes() < 10 ? ('0' + a.getMinutes()) : a.getMinutes();
     const sec = a.getSeconds() < 10 ? ('0' + a.getSeconds()) : a.getSeconds();
     return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+  }
+
+  updateAlbum(event) {
+    const prev = this.prevAlbum;
+    const albumID = this.albumService.photos[this.photo.id];
+    if (albumID === undefined || albumID === "undefined" || albumID === "") {
+      this.albumService.removeFromAlbum(this.photo.id, prev).subscribe(() => {}, console.error);
+    } else {
+      if (prev === undefined || albumID === "undefined" || albumID === "") {
+        this.albumService.setPhotoAlbum(this.photo.id, albumID).subscribe(() => {}, console.error);
+      } else {
+        this.albumService.removeFromAlbum(this.photo.id, prev).subscribe(() => {
+          this.albumService.setPhotoAlbum(this.photo.id, albumID).subscribe(() => {}, console.error);
+        }, console.error);
+      }
+    }
   }
 }
 

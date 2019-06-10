@@ -46,6 +46,7 @@ public class PostgreSQLVerticle extends AbstractVerticle {
     eventBus.consumer(EventBusAddress.DATABASE_INSERT, this::databaseInsert);
     eventBus.consumer(EventBusAddress.DATABASE_GET, this::databaseGet);
     eventBus.consumer(EventBusAddress.DATABASE_UPDATE, this::databaseUpdate);
+    eventBus.consumer(EventBusAddress.DATABASE_DELETE, this::databaseDelete);
   }
 
   @Override
@@ -247,6 +248,50 @@ public class PostgreSQLVerticle extends AbstractVerticle {
       }
 
       req.reply(new JsonObject().put("status", "ok").put("rows", result));
+    });
+  }
+
+  private void databaseDelete(Message<JsonObject> req) {
+    final JsonObject getObject = req.body();
+    final JsonObject query = getObject.getJsonObject("query");
+    final String tableName = getObject.getString("table");
+    final List<String> fields = new ArrayList<>(query.fieldNames());
+
+    StringBuilder sql = new StringBuilder();
+    Tuple values = Tuple.tuple();
+    sql.append("DELETE FROM ");
+    sql.append(tableName);
+    sql.append(" WHERE ");
+    for (int i = 0; i < fields.size(); i++) {
+      String field = fields.get(i);
+
+      sql.append(field);
+      sql.append(" = $");
+      sql.append(i + 1);
+
+      if (i + 1 < fields.size()) {
+        sql.append(" AND ");
+      }
+
+      Object fieldValue = query.getValue(field);
+      if (fieldValue instanceof String) {
+        values.addString((String) fieldValue);
+      } else if (fieldValue instanceof Integer) {
+        values.addInteger((Integer) fieldValue);
+      } else if (fieldValue instanceof Long) {
+        values.addLong((Long) fieldValue);
+      } else {
+        throw new AssertionError("Unexpected type: " + fieldValue.getClass().getName());
+      }
+    }
+
+    client.preparedQuery(sql.toString(), values, ar -> {
+      if (!ar.succeeded()) {
+        req.reply(new JsonObject().put("status", "error"));
+        return;
+      }
+
+      req.reply(new JsonObject().put("status", "ok"));
     });
   }
 

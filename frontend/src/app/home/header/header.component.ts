@@ -59,8 +59,10 @@ export class HeaderComponent {
         this.crypto.encryptAESKeyWithPublicRSA(albumEncKey, publicKey)
       ]);
     }).then(([nameEnc, keyEnc]) => {
-      this.albumService.create(keyEnc, nameEnc).subscribe(() => {}, console.error);
+      this.albumService.create(nameEnc, keyEnc).subscribe(() => {}, console.error);
     });
+
+    this.newAlbumName = '';
   }
 }
 
