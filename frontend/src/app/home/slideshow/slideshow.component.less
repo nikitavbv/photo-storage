@@ -1,0 +1,46 @@
+@import '../../variables';
+
+:host {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  user-select: none;
+  text-align: center;
+  line-height: 100vh;
+  background: linear-gradient(
+    rgba(0, 150, 136, 0.9),
+    rgba(0, 150, 136, 0.9)
+  );
+  color: white;
+  font-size: 40pt;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 100;
+}
+
+.photo-view {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.photo {
+  border-radius: 4px;
+  background-size: cover;
+  background-color: @white_darker_background;
+}
+
+.photo-h {
+  width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+.photo-v {
+  height: 100%;
+  width: auto;
+}

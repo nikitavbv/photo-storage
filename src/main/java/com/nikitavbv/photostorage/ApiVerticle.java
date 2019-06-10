@@ -1,8 +1,5 @@
 package com.nikitavbv.photostorage;
 
-import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
-
-import com.kosprov.jargon2.api.Jargon2;
 import com.nikitavbv.photostorage.models.ApplicationUser;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
@@ -48,6 +45,24 @@ public abstract class ApiVerticle extends AbstractVerticle {
     return future;
   }
 
+  protected Future<ApplicationUser> getUserByName(String username) {
+    Future<ApplicationUser> future = Future.future();
+
+    JsonObject query = new JsonObject().put("username", username);
+    JsonObject getOp = new JsonObject()
+            .put("table", "users")
+            .put("query", query)
+            .put("select_fields", new JsonArray().add("username").add("id").add("public_key"))
+            .put("limit", 1);
+    vertx.eventBus().send(EventBusAddress.DATABASE_GET, getOp, res -> {
+      JsonArray rows = ((JsonObject) res.result().body()).getJsonArray("rows");
+      JsonObject user = rows.getJsonObject(0);
+      future.complete(new ApplicationUser(user));
+    });
+
+    return future;
+  }
+
   protected Future<ApplicationUser> getUserByUserID(Integer userID) {
     Future<ApplicationUser> future = Future.future();
 
@@ -76,7 +91,7 @@ public abstract class ApiVerticle extends AbstractVerticle {
       JsonObject getOp = new JsonObject()
               .put("table", "sessions")
               .put("query", query)
-              .put("query_conditions", new JsonObject().put("valid_until", "<="))
+              .put("query_conditions", new JsonObject().put("valid_until", ">="))
               .put("select_fields", new JsonArray().add("user_id"))
               .put("limit", 1);
       vertx.eventBus().send(EventBusAddress.DATABASE_GET, getOp, res -> {

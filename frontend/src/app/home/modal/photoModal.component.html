@@ -1,0 +1,20 @@
+<div class="photo-view">
+  <img class="photo" [ngClass]="{'photo-v': photo.height > photo.width, 'photo-h': !(photo.height > photo.width)}" src="{{photo.data}}"  alt="photo"/>
+</div>
+<div class="side-menu">
+  <input [(ngModel)]="photo.description" (ngModelChange)="this.photoChanged = true" placeholder="Description..." />
+  <input [(ngModel)]="photo.location" (ngModelChange)="this.photoChanged=true" placeholder="Location..." />
+  <span class="uploaded-on">Uploaded on {{ unixTimestampToStr(photo.uploaded_at) }}</span>
+  <span class="section-name">tags:</span>
+  <div class="tags">
+    <div *ngFor="let tag of photo.tags" class="tag">{{ tag }} <span (click)="photo.removeTag(tag)" class="remove">x</span></div>
+  </div>
+  <input [(ngModel)]="newTagName" class="add-tag-input" placeholder="New tag name..." /><button (click)="photo.addTag(newTagName); newTagName = ''" class="add-tag-btn">Add</button>
+  <span class="section-name">Albums & sharing</span>
+  <select (ngModelChange)="prevAlbum = albumService.photos[photo.id]" [(ngModel)]="albumService.photos[photo.id]" (ngModelChange)="updateAlbum($event)" >
+    <option value="undefined">No album</option>
+    <option *ngFor="let album of albumService.albums" value="{{ album.id }}">{{ album.name }}</option>
+  </select>
+  <input [(ngModel)]="shareWithUserName" class="share-input" placeholder="Share with user..." /><button (click)="photo.shareWithUser(shareWithUserName); shareWithUserName = ''" class="share-btn">Share</button>
+  <button class="download-btn" (click)="photo.download()">Download</button>
+</div>

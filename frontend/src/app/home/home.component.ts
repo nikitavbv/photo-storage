@@ -1,8 +1,11 @@
 import {Component, HostListener, OnInit, ViewChild} from "@angular/core";
 import {HeaderComponent} from "./header";
-import {AuthenticationService, CryptoService, PhotoService} from "../_services";
+import {AuthenticationService, CryptoService, PhotoService, SearchService, UserService} from "../_services";
 import {Photo} from "../_models/photo";
 import {GetMyPhotosResponse} from "../_models/get-my-photos-response";
+import {AlbumService} from "../_services/album.service";
+import {GetMyAlbumsResponse} from "../_models/get-my-albums-response";
+import {Album} from "../_models/album";
 
 @Component({
   selector: 'home',
@@ -11,6 +14,8 @@ import {GetMyPhotosResponse} from "../_models/get-my-photos-response";
 })
 export class HomeComponent implements OnInit {
 
+  readonly SLIDESHOW_PHOTO_INTERVAL = 3000; // 3 seconds
+
   @ViewChild(HeaderComponent)
   private header: HeaderComponent;
 
@@ -18,19 +23,39 @@ export class HomeComponent implements OnInit {
   totalFilesInUpload: number = 0;
 
   photos: Photo[];
+  photosToDisplay: Photo[];
 
-  constructor(private crypto: CryptoService, private photoService: PhotoService, private auth: AuthenticationService) {}
+  selectedPhoto: Photo;
+  showingPhotoModal: boolean = false;
+  showingSlideshow: boolean;
+  slideshowPhotoIndex: number = 0;
+  slideshowInterval: number = -1;
+
+  constructor(private crypto: CryptoService,
+              private photoService: PhotoService,
+              private auth: AuthenticationService,
+              private search: SearchService,
+              private userService: UserService,
+              private albumService: AlbumService) {}
 
   ngOnInit() {
-    Promise.all<GetMyPhotosResponse, CryptoKey>([
+    Promise.all<GetMyPhotosResponse, CryptoKey, GetMyAlbumsResponse>([
       this.photoService.get_my_photos(),
-      this.auth.privateKey()
-    ]).then(([photos, privateKey]) => {
+      this.auth.privateKey(),
+      this.albumService.get_my_albums(),
+    ]).then(([photos, privateKey, albums]) => {
       this.photos = photos.photos.map(photo => Object.assign(
-        new Photo(this.photoService, this.crypto),
+        new Photo(this.photoService, this.crypto, this.userService, this.albumService),
         photo
       ));
       this.photos.forEach(photo => photo.loadAndDecrypt(privateKey));
+      this.photosToDisplay = this.photos;
+
+      this.albumService.albums = albums.albums.map(album => Object.assign(
+        new Album(this.albumService, this.crypto, this.auth),
+        album
+      ));
+      this.albumService.albums.forEach(album => album.init());
     }, console.error);
   }
 
@@ -85,7 +110,7 @@ export class HomeComponent implements OnInit {
         console.log(res);
         this.totalFilesInUpload--;
         this.updateUploadNotif();
-        const photo = new Photo(this.photoService, this.crypto);
+        const photo = new Photo(this.photoService, this.crypto, this.userService, this.albumService);
         photo.data = data;
         this.photos.unshift(photo);
       }, console.error);
@@ -111,5 +136,33 @@ export class HomeComponent implements OnInit {
       fileReader.readAsDataURL(file);
     });
   }
-}
 
+  openPhotoModal(photo: Photo) {
+    this.selectedPhoto = photo;
+    this.showingPhotoModal = true;
+  }
+
+  startSlideshow() {
+    this.showingSlideshow = true;
+    this.slideshowPhotoIndex = 0;
+    this.slideshowInterval = setInterval(() => {
+      this.slideshowPhotoIndex++;
+      if (this.slideshowPhotoIndex == this.photos.length) {
+        this.stopSlideshow();
+      }
+    }, this.SLIDESHOW_PHOTO_INTERVAL);
+  }
+
+  stopSlideshow() {
+    this.showingSlideshow = false;
+    clearInterval(this.slideshowInterval);
+  }
+
+  runSearch(query: string) {
+    if (query === '') {
+      this.photosToDisplay = this.photos;
+    } else {
+      this.photosToDisplay = this.search.filter(this.photos, query);
+    }
+  }
+}
