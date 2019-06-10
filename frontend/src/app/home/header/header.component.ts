@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Output, ViewChild} from "@angular/core";
+import {AuthenticationService} from "../../_services";
 
 @Component({
   selector: 'header',
@@ -19,6 +20,8 @@ export class HeaderComponent {
   @Output() filesToUploadSelected: EventEmitter<any> = new EventEmitter<any>();
   @Output() startSlideshow: EventEmitter<void> = new EventEmitter<void>();
   @Output() searchQueryUpdate: EventEmitter<string> = new EventEmitter<string>();
+
+  constructor(private auth: AuthenticationService) {}
 
   notif(text: string): void {
     this.notifText = text;

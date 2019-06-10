@@ -6,5 +6,5 @@
   <input #fileInput class="file-input" type="file" (change)="onFilesSelected($event)" multiple />
   <button>Create album</button>
   <button (click)="startSlideshow.emit()">Slideshow</button>
-  <button>Settings</button>
+  <button (click)="auth.logout()">Logout</button>
 </div>
