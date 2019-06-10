@@ -165,4 +165,18 @@ export class HomeComponent implements OnInit {
       this.photosToDisplay = this.search.filter(this.photos, query);
     }
   }
+
+  genTileBackgroundImage(): string {
+    return `background-image: linear-gradient(
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.6)
+  ), url("http://lorempixel.com/90/90/cats"),
+  url("http://lorempixel.com/90/90/nature"),
+  url("http://lorempixel.com/90/90/people"),
+  url("http://lorempixel.com/90/90/technics"),
+  linear-gradient(
+    rgba(0, 150, 136, 0.7),
+    rgba(0, 150, 136, 0.7)
+  );`;
+  }
 }

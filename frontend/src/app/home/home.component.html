@@ -1,13 +1,13 @@
 <header (filesToUploadSelected)="uploadFiles($event)" (startSlideshow)="startSlideshow()" (searchQueryUpdate)="runSearch($event)" ></header>
 
 <div class="tiles">
-  <div class="tile">
+  <div class="tile" [ngStyle]="{'background-image': genTileBackgroundImage()}">
     Albums
   </div>
-  <div class="tile">
+  <div class="tile" [ngStyle]="{'background-image': genTileBackgroundImage()}" >
     Tags
   </div>
-  <div class="tile">
+  <div class="tile" [ngStyle]="{'background-image': genTileBackgroundImage()}" >
     Locations
   </div>
 </div>
