@@ -27,7 +27,7 @@ export class LandingComponent implements OnInit, OnDestroy {
   subHeaderNextText = 'Stored here.';
   subHeaderText = '';
 
-  constructor(private auth: AuthenticationService) {}
+  constructor(public auth: AuthenticationService) {}
 
   ngOnInit(): void {
     this.typingTimeoutID = setTimeout(this.updateTyping.bind(this), 150);

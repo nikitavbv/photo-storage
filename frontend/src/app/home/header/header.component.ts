@@ -24,7 +24,7 @@ export class HeaderComponent {
   @Output() startSlideshow: EventEmitter<void> = new EventEmitter<void>();
   @Output() searchQueryUpdate: EventEmitter<string> = new EventEmitter<string>();
 
-  constructor(private auth: AuthenticationService,
+  constructor(public auth: AuthenticationService,
               private crypto: CryptoService,
               private albumService: AlbumService) {}
 

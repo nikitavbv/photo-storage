@@ -46,7 +46,7 @@ export class HomeComponent implements OnInit {
               private search: SearchService,
               private userService: UserService,
               private albumService: AlbumService,
-              private sanitizer: DomSanitizer) {}
+              public sanitizer: DomSanitizer) {}
 
   ngOnInit() {
     Promise.all<GetMyPhotosResponse, CryptoKey, GetMyAlbumsResponse>([
