@@ -25,7 +25,6 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/assets/crypto.worker.js"
             ],
             "styles": [
               "src/styles.less"
