@@ -1,13 +1,13 @@
 <header (filesToUploadSelected)="uploadFiles($event)" (startSlideshow)="startSlideshow()" (searchQueryUpdate)="runSearch($event)" ></header>
 
 <div class="tiles">
-  <div class="tile" [ngStyle]="{'background-image': genTileBackgroundImage()}">
+  <div class="tile" [style.background-image]="this.sanitizer.bypassSecurityTrustStyle('linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),url(' + tileStyle[4] + '),url('+tileStyle[6]+'),url('+tileStyle[8]+'),url('+tileStyle[10]+'),linear-gradient(rgba(0,150,136,0.7), rgba(0, 150, 136, 0.7))')">
     Albums
   </div>
-  <div class="tile" [ngStyle]="{'background-image': genTileBackgroundImage()}" >
+  <div class="tile" [style.background-image]="this.sanitizer.bypassSecurityTrustStyle('linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),url(' + tileStyle[5] + '),url('+tileStyle[7]+'),url('+tileStyle[9]+'),url('+tileStyle[11]+'),linear-gradient(rgba(0,150,136,0.7), rgba(0, 150, 136, 0.7))')">
     Tags
   </div>
-  <div class="tile" [ngStyle]="{'background-image': genTileBackgroundImage()}" >
+  <div class="tile" [style.background-image]="this.sanitizer.bypassSecurityTrustStyle('linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),url(' + tileStyle[0] + '),url('+tileStyle[1]+'),url('+tileStyle[2]+'),url('+tileStyle[3]+'),linear-gradient(rgba(0,150,136,0.7), rgba(0, 150, 136, 0.7))')">
     Locations
   </div>
 </div>

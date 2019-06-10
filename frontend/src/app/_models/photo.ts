@@ -40,7 +40,7 @@ export class Photo {
     });
   }
 
-  loadAndDecrypt(privateKey: CryptoKey): Promise<Photo> {
+  loadAndDecrypt(privateKey: CryptoKey, loaded: any): Promise<Photo> {
     return this.load().then(() => {
       this.crypto.decryptAESKeyWithPrivateRSA(this.key_enc, privateKey).then(key => {
         this.key = key;
@@ -48,6 +48,7 @@ export class Photo {
         this.crypto.aesDecrypt(this.data_enc, key).then(data => {
           this.data = decoder.decode(data);
           this.updateWidthAndHeight();
+          if (loaded) loaded(this);
         });
         if (this.description_enc != null) {
           this.crypto.aesDecrypt(this.description_enc, key).then(data => {

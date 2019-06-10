@@ -6,6 +6,7 @@ import {GetMyPhotosResponse} from "../_models/get-my-photos-response";
 import {AlbumService} from "../_services/album.service";
 import {GetMyAlbumsResponse} from "../_models/get-my-albums-response";
 import {Album} from "../_models/album";
+import {DomSanitizer} from "@angular/platform-browser";
 
 @Component({
   selector: 'home',
@@ -31,12 +32,15 @@ export class HomeComponent implements OnInit {
   slideshowPhotoIndex: number = 0;
   slideshowInterval: number = -1;
 
+  tileStyle: string[] = ['', '', '', '', '', '', '', '', '', '', '', ''];
+
   constructor(private crypto: CryptoService,
               private photoService: PhotoService,
               private auth: AuthenticationService,
               private search: SearchService,
               private userService: UserService,
-              private albumService: AlbumService) {}
+              private albumService: AlbumService,
+              private sanitizer: DomSanitizer) {}
 
   ngOnInit() {
     Promise.all<GetMyPhotosResponse, CryptoKey, GetMyAlbumsResponse>([
@@ -48,7 +52,12 @@ export class HomeComponent implements OnInit {
         new Photo(this.photoService, this.crypto, this.userService, this.albumService),
         photo
       ));
-      this.photos.forEach(photo => photo.loadAndDecrypt(privateKey));
+      this.photos.forEach(photo => photo.loadAndDecrypt(privateKey, photo => {
+        if (this.tileStyle.indexOf('') !== -1) {
+          this.tileStyle[this.tileStyle.indexOf('')] = photo.data;
+        }
+        this.tileStyle[Math.floor(Math.random() * (this.tileStyle.length + 1))] = photo.data;
+      }));
       this.photosToDisplay = this.photos;
 
       this.albumService.albums = albums.albums.map(album => Object.assign(
@@ -164,19 +173,5 @@ export class HomeComponent implements OnInit {
     } else {
       this.photosToDisplay = this.search.filter(this.photos, query);
     }
-  }
-
-  genTileBackgroundImage(): string {
-    return `background-image: linear-gradient(
-    rgba(0, 0, 0, 0.6),
-    rgba(0, 0, 0, 0.6)
-  ), url("http://lorempixel.com/90/90/cats"),
-  url("http://lorempixel.com/90/90/nature"),
-  url("http://lorempixel.com/90/90/people"),
-  url("http://lorempixel.com/90/90/technics"),
-  linear-gradient(
-    rgba(0, 150, 136, 0.7),
-    rgba(0, 150, 136, 0.7)
-  );`;
   }
 }
