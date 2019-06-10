@@ -38,7 +38,6 @@ export class Photo {
 
   loadAndDecrypt(privateKey: CryptoKey): Promise<Photo> {
     return this.load().then(() => {
-      console.log('key enc', this.key_enc);
       this.crypto.decryptAESKeyWithPrivateRSA(this.key_enc, privateKey).then(key => {
         this.key = key;
         const decoder = new TextDecoder();
@@ -120,7 +119,7 @@ export class Photo {
     this.userService.getPublicKey(name).subscribe(res => {
       this.crypto.importRSAPublicKey(res.public_key).then(publicKey => {
         this.crypto.encryptAESKeyWithPublicRSA(this.key, publicKey).then(encrypted => {
-          this.service.addPhotoKey(this.id, res.id, encrypted).subscribe(console.log, console.error);
+          this.service.addPhotoKey(this.id, res.id, encrypted).subscribe(() => {}, console.error);
         });
       })
     }, console.error);

@@ -4,7 +4,12 @@
 <div class="right-nav">
   <button (click)="selectFilesForUpload()">Upload</button>
   <input #fileInput class="file-input" type="file" (change)="onFilesSelected($event)" multiple />
-  <button>Create album</button>
+  <button (click)="creatingAlbum = true" >Create album</button>
   <button (click)="startSlideshow.emit()">Slideshow</button>
   <button (click)="auth.logout()">Logout</button>
+</div>
+<div class="create-album" *ngIf="creatingAlbum">
+  <div class="create-album-input">
+    <input [(ngModel)]="newAlbumName" placeholder="album name..."><button (click)="createAlbum(); creatingAlbum = false" >Create</button>
+  </div>
 </div>

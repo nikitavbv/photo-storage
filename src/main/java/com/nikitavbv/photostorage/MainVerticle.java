@@ -1,5 +1,6 @@
 package com.nikitavbv.photostorage;
 
+import com.nikitavbv.photostorage.api.AlbumApiVerticle;
 import com.nikitavbv.photostorage.api.PhotoApiVerticle;
 import com.nikitavbv.photostorage.api.UserApiVerticle;
 import com.nikitavbv.photostorage.auth.AuthVerticle;
@@ -26,7 +27,8 @@ public class MainVerticle extends AbstractVerticle {
             PhotoApiVerticle.class.getName(),
             CryptoVerticle.class.getName(),
             GoogleCloudStorageVerticle.class.getName(),
-            UserApiVerticle.class.getName()
+            UserApiVerticle.class.getName(),
+            AlbumApiVerticle.class.getName()
     ).forEach(vertx::deployVerticle);
   }
 

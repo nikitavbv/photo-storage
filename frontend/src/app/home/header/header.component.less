@@ -3,9 +3,9 @@
 :host {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
   width: 100%;
   line-height: 30px;
-  height: 30px;
   font-size: 14pt;
   font-weight: 100;
   font-family: 'Open Sans', sans-serif;
@@ -82,6 +82,44 @@
   button:hover {
     color: @primary_color;
     background-color: @white_darker_background;
+  }
+
+  .create-album {
+    display: block;
+    background-color: @white_darker_background;
+    width: 100%;
+    padding: 10px 0;
+
+    input {
+      border: 1px solid #f2f2f2;
+      background-color: white;
+      color: @text_secondary_color;
+      padding: 0 8px;
+      width: 300px;
+      height: 44px;
+    }
+
+    button {
+      text-align: center;
+      background-color: @primary_color;
+      color: white;
+      transition: all 0.4s ease-out;
+      border: 1px solid @primary_color;
+      cursor: pointer;
+      height: 44px;
+      margin-top: -4px;
+    }
+
+    button:hover {
+      background-color: white;
+      color: @primary_color;
+    }
+
+    .create-album-input {
+      margin: 0 auto;
+      width: 500px;
+      display: block;
+    }
   }
 }
 

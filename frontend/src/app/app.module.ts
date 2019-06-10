@@ -18,6 +18,7 @@ import {AuthComponent, LandingComponent, SignInComponent} from "./landing";
 import {SignUpComponent} from "./landing/auth/sign-up";
 import {FormsModule} from "@angular/forms";
 import {HeaderComponent, HomeComponent, PhotoComponent, PhotoModalComponent, SlideshowComponent} from "./home";
+import {AlbumService} from "./_services/album.service";
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import {HeaderComponent, HomeComponent, PhotoComponent, PhotoModalComponent, Sli
     FormsModule,
   ],
   providers: [
+    AlbumService,
     AuthGuard,
     AuthenticationService,
     CryptoService,
