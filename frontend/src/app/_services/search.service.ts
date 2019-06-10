@@ -35,6 +35,10 @@ export class SearchService {
       return true;
     }
 
+    if (photo.location && photo.location.indexOf(query) !== -1) {
+      return true;
+    }
+
     if (photo.tags) {
       for (let tag of photo.tags) {
         if (query.indexOf(tag) !== -1) {
