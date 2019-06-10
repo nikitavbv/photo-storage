@@ -7,7 +7,7 @@ export class Photo {
   data_enc: string;
   data: string;
 
-  uploaded_at: number;
+  uploaded_at: number = 0;
 
   width: number;
   height: number;
@@ -49,11 +49,15 @@ export class Photo {
           this.crypto.aesDecrypt(this.description_enc, key).then(data => {
             this.description = decoder.decode(data);
           });
+        } else {
+          this.description = '';
         }
         if (this.location_enc != null) {
           this.crypto.aesDecrypt(this.location_enc, key).then(data => {
             this.location = decoder.decode(data);
           });
+        } else {
+          this.location = '';
         }
         if (this.tags_enc != null) {
           this.crypto.aesDecrypt(this.tags_enc, key).then(data => {
