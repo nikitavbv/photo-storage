@@ -8,3 +8,4 @@ data
 terraform.tfstate
 terraform.tfstate.backup
 conf/config.json
+.credentials
