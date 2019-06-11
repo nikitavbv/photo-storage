@@ -43,8 +43,6 @@ resource "google_sql_database_instance" "master" {
 resource "google_sql_database" "photostorage_db" {
   name = "photostorage"
   instance = google_sql_database_instance.master.name
-  charset = "latin1"
-  collation = "latin1_swedish_ci"
 }
 
 data "google_container_registry_repository" "registry" {
