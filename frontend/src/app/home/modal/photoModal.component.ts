@@ -20,7 +20,7 @@ export class PhotoModalComponent {
 
   prevAlbum: string = '';
 
-  constructor(private albumService: AlbumService) {}
+  constructor(public albumService: AlbumService) {}
 
   @HostListener('document:keydown.escape', ['$event'])
   onKeydownHandler() {

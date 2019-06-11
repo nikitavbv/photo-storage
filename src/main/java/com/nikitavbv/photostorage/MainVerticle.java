@@ -11,6 +11,7 @@ import com.nikitavbv.photostorage.api.PhotoUploadVerticle;
 import com.nikitavbv.photostorage.utils.CryptoVerticle;
 import com.nikitavbv.photostorage.storage.GoogleCloudStorageVerticle;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Vertx;
 import java.util.Arrays;
 
 public class MainVerticle extends AbstractVerticle {
@@ -30,6 +31,10 @@ public class MainVerticle extends AbstractVerticle {
             UserApiVerticle.class.getName(),
             AlbumApiVerticle.class.getName()
     ).forEach(vertx::deployVerticle);
+  }
+
+  public static void main(String[] args) {
+    Vertx.vertx().deployVerticle(MainVerticle.class.getName());
   }
 
 }
