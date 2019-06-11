@@ -65,11 +65,11 @@ public class PostgreSQLVerticle extends AbstractVerticle {
       JsonObject config = ar.result();
 
       PgPoolOptions options = new PgPoolOptions()
-              .setPort(config.getInteger("database.host", DATABASE_DEFAULT_PORT))
-              .setHost(config.getString("database.port", DATABASE_DEFAULT_HOST))
-              .setUser(config.getString("database.user", DATABASE_DEFAULT_USER))
-              .setPassword(config.getString("database.password", DATABASE_DEFAULT_PASSWORD))
-              .setDatabase(config.getString("database.name", DATABASE_DEFAULT_NAME))
+              .setPort(config.getDouble("database_port", Integer.valueOf(DATABASE_DEFAULT_PORT).doubleValue()).intValue())
+              .setHost(config.getString("database_host", DATABASE_DEFAULT_HOST))
+              .setUser(config.getString("database_user", DATABASE_DEFAULT_USER))
+              .setPassword(config.getString("database_password", DATABASE_DEFAULT_PASSWORD))
+              .setDatabase(config.getString("database_name", DATABASE_DEFAULT_NAME))
               .setMaxSize(DATABASE_MAX_POOL_SIZE);
 
       client = PgClient.pool(vertx, options);
