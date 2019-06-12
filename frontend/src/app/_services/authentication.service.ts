@@ -25,6 +25,10 @@ export class AuthenticationService {
       this.httpClient.post<AuthenticationResponse>('/api/v1/auth', {
         username, password
       }).subscribe((res: AuthenticationResponse) => {
+        if (res.status !== 'ok') {
+          reject(res);
+          return;
+        }
         this.crypto.deriveAESKey(password, res.private_key_salt).then((derivedKey: any) => {
           this.crypto.decryptPrivateRSAKeyWithAES(res.private_key_enc, derivedKey.key).then(decryptedPrivate => {
             this.crypto.exportRSAPrivateKey(decryptedPrivate).then(exportedKey => {
