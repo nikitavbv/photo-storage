@@ -1,6 +1,6 @@
 <div class="sign-in-header">Sign Up</div>
 
-<input [(ngModel)]="username" placeholder="username" />
-<input [(ngModel)]="passphrase"  type="password" placeholder="passphrase" />
-<input [(ngModel)]="passphraseRepeat" type="password" placeholder="passphrase repeat" />
-<button (click)="signUp()" >Sign Up</button>
+<input [(ngModel)]="username" [ngClass]="{'invalid': !isUsernameValid() }" placeholder="username" />
+<input [(ngModel)]="passphrase" [ngClass]="{'invalid': !isPassphraseValid() }" type="password" placeholder="passphrase" />
+<input [(ngModel)]="passphraseRepeat" [ngClass]="{'invalid': !isPassphraseRepeatValid() }" type="password" placeholder="passphrase repeat" />
+<button (click)="signUp()" [ngClass]="{'invalid': !isFormValid() }" [disabled]="{'invalid': !isFormValid() }">Sign Up</button>

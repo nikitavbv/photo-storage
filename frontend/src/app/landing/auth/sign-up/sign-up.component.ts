@@ -35,4 +35,20 @@ export class SignUpComponent {
     this.auth.signUp(username, password, publicKey, masterKey, masterKeySalt)
       .subscribe(() => this.signedUp.emit());
   }
+
+  isUsernameValid(): boolean {
+    return this.username.length == 0 || this.username.length > 8;
+  }
+
+  isPassphraseValid(): boolean {
+    return this.passphrase.length == 0 || this.passphrase.length > 8;
+  }
+
+  isPassphraseRepeatValid(): boolean {
+    return this.passphraseRepeat.length == 0 || this.passphraseRepeat == this.passphrase;
+  }
+
+  isFormValid(): boolean {
+    return this.isUsernameValid() && this.isPassphraseValid() && this.isPassphraseRepeatValid();
+  }
 }
