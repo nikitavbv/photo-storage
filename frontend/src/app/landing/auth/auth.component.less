@@ -26,6 +26,11 @@ input {
   background-color: white;
   color: @text_secondary_color;
   padding: 0 16px;
+  transition: all 0.4s ease-out;
+}
+
+input.invalid {
+  border-color: @error_color;
 }
 
 button {
@@ -40,6 +45,12 @@ button {
 button:hover {
   background-color: white;
   color: @primary_color;
+}
+
+button.invalid {
+  background-color: @white_darker_background;
+  border-color: @white_darker_background;
+  color: black;
 }
 
 .auth-switch-link {
